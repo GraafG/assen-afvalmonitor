@@ -5,25 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assen Afvalmonitor - Ondergrondse Containers</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <style>
+        :root {
+            --bg-body: #0f1419;
+            --bg-surface: #16202a;
+            --bg-card: #1d2a35;
+            --border: #2f3336;
+            --text-primary: #e7e9ea;
+            --text-secondary: #71767b;
+            --text-strong: #fff;
+            --accent: #1d9bf0;
+            --accent-hover: #1a8cd8;
+            --fill-track: #2f3336;
+            --marker-stroke: #fff;
+        }
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-body: #f7f9fa;
+                --bg-surface: #ffffff;
+                --bg-card: #f0f3f5;
+                --border: #dce0e3;
+                --text-primary: #1a1a1a;
+                --text-secondary: #5b6570;
+                --text-strong: #000;
+                --accent: #0969da;
+                --accent-hover: #0550ae;
+                --fill-track: #dce0e3;
+                --marker-stroke: #333;
+            }
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1419; color: #e7e9ea; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-body); color: var(--text-primary); }
         
         .header { 
             padding: 1rem 1.5rem; 
-            background: #16202a; 
-            border-bottom: 1px solid #2f3336;
+            background: var(--bg-surface); 
+            border-bottom: 1px solid var(--border);
             display: flex; align-items: center; gap: 1rem;
         }
         .header h1 { font-size: 1.25rem; font-weight: 600; }
-        .header .subtitle { color: #71767b; font-size: 0.85rem; }
+        .header .subtitle { color: var(--text-secondary); font-size: 0.85rem; }
         
         .layout { display: flex; height: calc(100vh - 60px); }
         
         .sidebar {
             width: 320px; min-width: 320px;
-            background: #16202a;
-            border-right: 1px solid #2f3336;
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border);
             overflow-y: auto;
             padding: 1rem;
         }
@@ -33,16 +64,16 @@
             gap: 0.75rem; margin-bottom: 1.5rem;
         }
         .stat-card {
-            background: #1d2a35;
-            border: 1px solid #2f3336;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 0.75rem;
         }
-        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #fff; }
-        .stat-card .label { font-size: 0.75rem; color: #71767b; margin-top: 0.25rem; }
+        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: var(--text-strong); }
+        .stat-card .label { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; }
         
         .legend { margin-bottom: 1.5rem; }
-        .legend h3 { font-size: 0.85rem; color: #71767b; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .legend h3 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
         .legend-item {
             display: flex; align-items: center; gap: 0.5rem;
             padding: 0.4rem 0; cursor: pointer;
@@ -55,23 +86,23 @@
             flex-shrink: 0;
         }
         .legend-label { font-size: 0.85rem; flex: 1; }
-        .legend-count { font-size: 0.8rem; color: #71767b; }
+        .legend-count { font-size: 0.8rem; color: var(--text-secondary); }
         
         .filter-section { margin-bottom: 1.5rem; }
-        .filter-section h3 { font-size: 0.85rem; color: #71767b; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .filter-section h3 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
         
         .search-input {
             width: 100%; padding: 0.5rem 0.75rem;
-            background: #1d2a35; border: 1px solid #2f3336;
-            border-radius: 6px; color: #e7e9ea;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text-primary);
             font-size: 0.85rem; outline: none;
         }
-        .search-input:focus { border-color: #1d9bf0; }
-        .search-input::placeholder { color: #71767b; }
+        .search-input:focus { border-color: var(--accent); }
+        .search-input::placeholder { color: var(--text-secondary); }
         
         .info-panel {
-            background: #1d2a35;
-            border: 1px solid #2f3336;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 1rem;
             display: none;
@@ -79,10 +110,10 @@
         .info-panel.active { display: block; }
         .info-panel h3 { font-size: 0.95rem; margin-bottom: 0.5rem; }
         .info-row { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.85rem; }
-        .info-row .label { color: #71767b; }
+        .info-row .label { color: var(--text-secondary); }
         
         .fill-indicator {
-            height: 6px; background: #2f3336; border-radius: 3px;
+            height: 6px; background: var(--fill-track); border-radius: 3px;
             margin-top: 0.5rem; overflow: hidden;
         }
         .fill-indicator .bar {
@@ -94,14 +125,14 @@
         
         .refresh-btn {
             position: fixed; bottom: 1.5rem; right: 1.5rem;
-            background: #1d9bf0; color: #fff;
+            background: var(--accent); color: #fff;
             border: none; border-radius: 8px;
             padding: 0.75rem 1.25rem; font-size: 0.85rem;
             cursor: pointer; font-weight: 600;
             box-shadow: 0 4px 12px rgba(29,155,240,0.3);
             z-index: 1000;
         }
-        .refresh-btn:hover { background: #1a8cd8; }
+        .refresh-btn:hover { background: var(--accent-hover); }
         
         .status-badge {
             display: inline-block; padding: 0.2rem 0.5rem;
@@ -113,9 +144,57 @@
         
         @media (max-width: 768px) {
             .layout { flex-direction: column-reverse; }
-            .sidebar { width: 100%; min-width: unset; height: 40vh; border-right: none; border-top: 1px solid #2f3336; }
+            .sidebar { width: 100%; min-width: unset; height: 40vh; border-right: none; border-top: 1px solid var(--border); }
             #map { height: 60vh; }
         }
+
+        .marker-cluster {
+            background-clip: padding-box;
+            border-radius: 20px;
+        }
+
+        .changelog { margin-top: 1rem; }
+        .changelog h3 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .changelog-entry {
+            padding: 0.5rem 0.6rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+            display: flex; align-items: flex-start; gap: 0.5rem;
+        }
+        .changelog-entry:last-child { border-bottom: none; }
+        .changelog-icon { font-size: 1.1rem; flex-shrink: 0; }
+        .changelog-body { flex: 1; }
+        .changelog-meta { color: var(--text-secondary); font-size: 0.7rem; margin-top: 0.15rem; }
+        .changelog-change { font-weight: 600; }
+        .changelog-change.drop { color: #4caf50; }
+        .changelog-change.rise { color: #ff6b35; }
+        .stale-badge { 
+            display: inline-block; background: #f44336; color: #fff;
+            font-size: 0.6rem; padding: 0.1rem 0.3rem; border-radius: 3px;
+            font-weight: 700; margin-left: 0.3rem; vertical-align: middle;
+        }
+        .filter-btn {
+            padding: 0.4rem 0.75rem; border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text-secondary);
+            border-radius: 6px; font-size: 0.8rem; cursor: pointer;
+            font-weight: 500; transition: all 0.15s;
+        }
+        .filter-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+        .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .marker-cluster div {
+            width: 38px; height: 38px;
+            margin-left: 6px; margin-top: 6px;
+            text-align: center; border-radius: 50%;
+            font: 14px "Segoe UI", sans-serif; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-strong);
+        }
+        .marker-cluster-small { background-color: rgba(29, 155, 240, 0.4); }
+        .marker-cluster-small div { background-color: rgba(29, 155, 240, 0.7); }
+        .marker-cluster-medium { background-color: rgba(255, 152, 0, 0.4); }
+        .marker-cluster-medium div { background-color: rgba(255, 152, 0, 0.7); }
+        .marker-cluster-large { background-color: rgba(244, 67, 54, 0.4); }
+        .marker-cluster-large div { background-color: rgba(244, 67, 54, 0.7); }
     </style>
 </head>
 <body>
@@ -151,6 +230,23 @@
                 <input type="text" class="search-input" id="search" placeholder="Zoek op straat of nummer...">
             </div>
             
+            <div class="filter-section">
+                <h3>Minimum vulgraad</h3>
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <input type="range" id="fill-filter" min="0" max="100" value="0" style="flex:1; accent-color:var(--accent); height:28px;">
+                    <span id="fill-filter-label" style="min-width:3ch; font-weight:600;">0%</span>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Sensor</h3>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="filter-btn active" id="sensor-all" onclick="setSensorFilter('all')">Alle</button>
+                    <button class="filter-btn" id="sensor-yes" onclick="setSensorFilter('yes')">Met sensor</button>
+                    <button class="filter-btn" id="sensor-no" onclick="setSensorFilter('no')">Zonder sensor</button>
+                </div>
+            </div>
+            
             <div class="legend" id="legend">
                 <h3>Fracties</h3>
             </div>
@@ -159,12 +255,18 @@
                 <h3 id="info-title">Container</h3>
                 <div id="info-content"></div>
             </div>
+
+            <div class="changelog" id="changelog">
+                <h3>Recente wijzigingen</h3>
+                <div id="changelog-list"></div>
+            </div>
         </div>
         
         <div id="map"></div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script>
         const TYPE_COLORS = {
             'Restafval': '#ff6b35',
@@ -178,36 +280,71 @@
         let containers = [];
         let markers = [];
         let activeTypes = new Set();
+        let sensorFilter = 'all'; // 'all', 'yes', 'no'
         let map;
         let markerGroup;
         
+        // Detect color scheme preference
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const tileUrl = isDark
+            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+        
         // Initialize map centered on Assen
         map = L.map('map', { zoomControl: true }).setView([52.9925, 6.5625], 14);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        const tileLayer = L.tileLayer(tileUrl, {
             attribution: '© OpenStreetMap contributors © CARTO',
             maxZoom: 19
         }).addTo(map);
         
-        markerGroup = L.layerGroup().addTo(map);
+        // Switch tiles when system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            const newUrl = e.matches
+                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+            tileLayer.setUrl(newUrl);
+            updateMarkers(); // refresh marker stroke colors
+        });
+        
+        markerGroup = L.markerClusterGroup({
+            maxClusterRadius: 60,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            spiderfyDistanceMultiplier: 2,
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                let px = 50;
+                if (count > 20) { size = 'large'; px = 70; }
+                else if (count > 5) { size = 'medium'; px = 60; }
+                return L.divIcon({
+                    html: '<div><span>' + count + '</span></div>',
+                    className: 'marker-cluster marker-cluster-' + size,
+                    iconSize: L.point(px, px)
+                });
+            }
+        }).addTo(map);
         
         function createMarker(container) {
             const color = TYPE_COLORS[container.type] || TYPE_COLORS['Onbekend'];
             const fillLevel = container.fillLevel;
             
-            let radius = 7;
+            let radius = 12;
             let fillOpacity = 0.8;
             let tooltipExtra = '';
             
             if (fillLevel !== undefined && fillLevel !== null) {
-                radius = 5 + (fillLevel / 100) * 6;
+                radius = 10 + (fillLevel / 100) * 10;
                 fillOpacity = 0.4 + (fillLevel / 100) * 0.5;
                 tooltipExtra = `<br>Vulgraad: <strong>${fillLevel}%</strong>`;
             }
             
+            const markerStroke = window.matchMedia('(prefers-color-scheme: dark)').matches ? '#fff' : '#333';
             const marker = L.circleMarker([container.lat, container.lng], {
                 radius: radius,
                 fillColor: color,
-                color: '#fff',
+                color: markerStroke,
                 weight: 1,
                 opacity: 0.8,
                 fillOpacity: fillOpacity,
@@ -253,11 +390,15 @@
             markerGroup.clearLayers();
             markers = [];
             const search = document.getElementById('search').value.toLowerCase();
+            const minFill = parseInt(document.getElementById('fill-filter').value) || 0;
             let visible = 0;
             
             containers.forEach(container => {
                 if (!activeTypes.has(container.type || 'Onbekend')) return;
                 if (search && !(`${container.street || container.adres || ''} ${container.number}`.toLowerCase().includes(search))) return;
+                if (minFill > 0 && (container.fillLevel === undefined || container.fillLevel === null || container.fillLevel < minFill)) return;
+                if (sensorFilter === 'yes' && !container.heeftSensor) return;
+                if (sensorFilter === 'no' && container.heeftSensor) return;
                 
                 const marker = createMarker(container);
                 markerGroup.addLayer(marker);
@@ -353,9 +494,67 @@
             updateStats();
             buildLegend();
             updateMarkers();
+            
+            // Load change events
+            try {
+                const evResp = await fetch('data/events_mock.json');
+                const events = await evResp.json();
+                renderChangelog(events);
+            } catch {}
+        }
+        
+        function renderChangelog(events) {
+            const list = document.getElementById('changelog-list');
+            const now = new Date();
+            const STALE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+            
+            let html = '';
+            const shown = events.slice(0, 30);
+            
+            for (const ev of shown) {
+                const date = new Date(ev.ts);
+                const diff = ev.to - ev.from;
+                const isDrop = diff < -20;
+                const isRise = diff > 0;
+                const icon = isDrop ? '😊' : (isRise ? '📈' : '➡️');
+                const cls = isDrop ? 'drop' : (isRise ? 'rise' : '');
+                const sign = diff > 0 ? '+' : '';
+                
+                // Stale detection
+                const age = now - date;
+                const staleTag = age > STALE_MS ? '<span class="stale-badge">STALE &gt;7d</span>' : '';
+                
+                const timeStr = date.toLocaleString('nl-NL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                
+                html += `
+                    <div class="changelog-entry">
+                        <span class="changelog-icon">${icon}</span>
+                        <div class="changelog-body">
+                            <div><strong>${ev.nr}</strong> — ${ev.adres || ''} ${staleTag}</div>
+                            <div><span class="changelog-change ${cls}">${ev.from}% → ${ev.to}% (${sign}${diff}%)</span> · ${ev.fractie}</div>
+                            <div class="changelog-meta">${timeStr}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            list.innerHTML = html || '<div style="color:var(--text-secondary);padding:0.5rem;">Geen wijzigingen</div>';
         }
         
         document.getElementById('search').addEventListener('input', updateMarkers);
+        const fillFilter = document.getElementById('fill-filter');
+        fillFilter.addEventListener('input', () => {
+            document.getElementById('fill-filter-label').textContent = fillFilter.value + '%';
+            updateMarkers();
+        });
+
+        function setSensorFilter(mode) {
+            sensorFilter = mode;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('sensor-' + mode).classList.add('active');
+            updateMarkers();
+        }
+
         init();
     </script>
 </body>

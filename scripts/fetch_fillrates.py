@@ -13,7 +13,9 @@ Requirements:
 import json
 import sys
 import time
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 try:
     from playwright.sync_api import sync_playwright
@@ -32,7 +34,7 @@ ADDRESS_MATCH = "4J"
 def fetch_containers():
     """Navigate Burgerportaal and capture container fill rate data."""
     pw = sync_playwright().start()
-    browser = pw.chromium.launch(headless=True, channel="msedge")
+    browser = pw.chromium.launch(headless=True)
     context = browser.new_context(viewport={"width": 1920, "height": 1080})
     page = context.new_page()
 
@@ -185,10 +187,13 @@ def main():
 
         # Save metadata
         meta_file = output_dir / "meta.json"
+        ams_tz = ZoneInfo("Europe/Amsterdam")
+        now_ams = datetime.now(ams_tz)
         meta = {
             "source": "burgerportaal-mendix",
             "url": BASE_URL,
-            "updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "updated": now_ams.isoformat(),
+            "timezone": "Europe/Amsterdam",
             "containers": len(locaties),
             "with_sensor": with_sensor,
             "avg_vulgraad": round(avg_fill, 1),
