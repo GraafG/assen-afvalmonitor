@@ -23,10 +23,12 @@ jobs:
           python-version: '3.11'
       
       - name: Install dependencies
-        run: pip install requests
+        run: |
+          pip install playwright
+          playwright install chromium --with-deps
       
-      - name: Fetch latest data
-        run: python scripts/build_data.py
+      - name: Fetch fill rate data
+        run: python scripts/fetch_fillrates.py
       
       - name: Commit updated data
         run: |

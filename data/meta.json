@@ -1,6 +1,8 @@
 {
-  "last_updated": "2026-06-03T17:07:26.931144",
-  "containers_count": 469,
-  "calendar_items": 36,
-  "has_fillrates": false
+  "source": "burgerportaal-mendix",
+  "url": "https://21burgerportaal.mendixcloud.com",
+  "updated": "2026-06-03T16:46:58Z",
+  "containers": 606,
+  "with_sensor": 597,
+  "avg_vulgraad": 17.8
 }
