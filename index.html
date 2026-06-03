@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assen Afvalmonitor - Ondergrondse Containers</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f1419; color: #e7e9ea; }
+        
+        .header { 
+            padding: 1rem 1.5rem; 
+            background: #16202a; 
+            border-bottom: 1px solid #2f3336;
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .header h1 { font-size: 1.25rem; font-weight: 600; }
+        .header .subtitle { color: #71767b; font-size: 0.85rem; }
+        
+        .layout { display: flex; height: calc(100vh - 60px); }
+        
+        .sidebar {
+            width: 320px; min-width: 320px;
+            background: #16202a;
+            border-right: 1px solid #2f3336;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 0.75rem; margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: #1d2a35;
+            border: 1px solid #2f3336;
+            border-radius: 8px;
+            padding: 0.75rem;
+        }
+        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #fff; }
+        .stat-card .label { font-size: 0.75rem; color: #71767b; margin-top: 0.25rem; }
+        
+        .legend { margin-bottom: 1.5rem; }
+        .legend h3 { font-size: 0.85rem; color: #71767b; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .legend-item {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.4rem 0; cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .legend-item:hover { opacity: 0.8; }
+        .legend-item.inactive { opacity: 0.3; }
+        .legend-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .legend-label { font-size: 0.85rem; flex: 1; }
+        .legend-count { font-size: 0.8rem; color: #71767b; }
+        
+        .filter-section { margin-bottom: 1.5rem; }
+        .filter-section h3 { font-size: 0.85rem; color: #71767b; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        .search-input {
+            width: 100%; padding: 0.5rem 0.75rem;
+            background: #1d2a35; border: 1px solid #2f3336;
+            border-radius: 6px; color: #e7e9ea;
+            font-size: 0.85rem; outline: none;
+        }
+        .search-input:focus { border-color: #1d9bf0; }
+        .search-input::placeholder { color: #71767b; }
+        
+        .info-panel {
+            background: #1d2a35;
+            border: 1px solid #2f3336;
+            border-radius: 8px;
+            padding: 1rem;
+            display: none;
+        }
+        .info-panel.active { display: block; }
+        .info-panel h3 { font-size: 0.95rem; margin-bottom: 0.5rem; }
+        .info-row { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.85rem; }
+        .info-row .label { color: #71767b; }
+        
+        .fill-indicator {
+            height: 6px; background: #2f3336; border-radius: 3px;
+            margin-top: 0.5rem; overflow: hidden;
+        }
+        .fill-indicator .bar {
+            height: 100%; border-radius: 3px;
+            transition: width 0.3s;
+        }
+        
+        #map { flex: 1; }
+        
+        .refresh-btn {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            background: #1d9bf0; color: #fff;
+            border: none; border-radius: 8px;
+            padding: 0.75rem 1.25rem; font-size: 0.85rem;
+            cursor: pointer; font-weight: 600;
+            box-shadow: 0 4px 12px rgba(29,155,240,0.3);
+            z-index: 1000;
+        }
+        .refresh-btn:hover { background: #1a8cd8; }
+        
+        .status-badge {
+            display: inline-block; padding: 0.2rem 0.5rem;
+            border-radius: 4px; font-size: 0.7rem;
+            font-weight: 600; text-transform: uppercase;
+        }
+        .status-badge.live { background: #00ba7c33; color: #00ba7c; }
+        .status-badge.static { background: #f9197f33; color: #f9197f; }
+        
+        @media (max-width: 768px) {
+            .layout { flex-direction: column-reverse; }
+            .sidebar { width: 100%; min-width: unset; height: 40vh; border-right: none; border-top: 1px solid #2f3336; }
+            #map { height: 60vh; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗑️ Assen Afvalmonitor</h1>
+        <span class="subtitle">Ondergrondse containers</span>
+        <span class="status-badge static">Static Data</span>
+    </div>
+    
+    <div class="layout">
+        <div class="sidebar">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="value" id="total-count">-</div>
+                    <div class="label">Containers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="type-count">-</div>
+                    <div class="label">Fracties</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="street-count">-</div>
+                    <div class="label">Straten</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value" id="visible-count">-</div>
+                    <div class="label">Zichtbaar</div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Zoeken</h3>
+                <input type="text" class="search-input" id="search" placeholder="Zoek op straat of nummer...">
+            </div>
+            
+            <div class="legend" id="legend">
+                <h3>Fracties</h3>
+            </div>
+            
+            <div class="info-panel" id="info-panel">
+                <h3 id="info-title">Container</h3>
+                <div id="info-content"></div>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+    </div>
+    
+    <button class="refresh-btn" onclick="fetchLiveData()" title="Probeer live vulgraad data op te halen">
+        🔄 Refresh Fill Rates
+    </button>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const TYPE_COLORS = {
+            'Restafval': '#ff6b35',
+            'BIO': '#4caf50',
+            'Papier': '#2196f3',
+            'Glas': '#9c27b0',
+            'PMD': '#ff9800',
+            'Kleding': '#e91e63',
+            'null': '#666',
+        };
+        
+        let containers = [];
+        let markers = [];
+        let activeTypes = new Set();
+        let map;
+        let markerGroup;
+        
+        // Initialize map centered on Assen
+        map = L.map('map', { zoomControl: true }).setView([52.9925, 6.5625], 14);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors © CARTO',
+            maxZoom: 19
+        }).addTo(map);
+        
+        markerGroup = L.layerGroup().addTo(map);
+        
+        function createMarker(container) {
+            const color = TYPE_COLORS[container.type] || TYPE_COLORS['null'];
+            const fillLevel = container.fillLevel;
+            
+            let radius = 7;
+            let fillOpacity = 0.8;
+            let tooltipExtra = '';
+            
+            if (fillLevel !== undefined && fillLevel !== null) {
+                radius = 5 + (fillLevel / 100) * 6;
+                fillOpacity = 0.4 + (fillLevel / 100) * 0.5;
+                tooltipExtra = `<br>Vulgraad: <strong>${fillLevel}%</strong>`;
+            }
+            
+            const marker = L.circleMarker([container.lat, container.lng], {
+                radius: radius,
+                fillColor: color,
+                color: '#fff',
+                weight: 1,
+                opacity: 0.8,
+                fillOpacity: fillOpacity,
+            });
+            
+            marker.bindTooltip(
+                `<strong>${container.type || 'Onbekend'}</strong><br>${container.street || ''} #${container.number}${tooltipExtra}`,
+                { direction: 'top', offset: [0, -8] }
+            );
+            
+            marker.on('click', () => showInfo(container));
+            marker.containerData = container;
+            return marker;
+        }
+        
+        function showInfo(container) {
+            const panel = document.getElementById('info-panel');
+            const title = document.getElementById('info-title');
+            const content = document.getElementById('info-content');
+            
+            panel.classList.add('active');
+            title.textContent = `Container #${container.number}`;
+            
+            let html = `
+                <div class="info-row"><span class="label">Straat</span><span>${container.street || '-'}</span></div>
+                <div class="info-row"><span class="label">Type</span><span>${container.type || '-'}</span></div>
+                <div class="info-row"><span class="label">Subtype</span><span>${container.subtype || '-'}</span></div>
+                <div class="info-row"><span class="label">Staat</span><span>${container.condition || '-'}</span></div>
+                <div class="info-row"><span class="label">Leverancier</span><span>${container.supplier || '-'}</span></div>
+                <div class="info-row"><span class="label">Kleur</span><span>${container.color || '-'}</span></div>
+            `;
+            
+            if (container.fillLevel !== undefined && container.fillLevel !== null) {
+                const level = container.fillLevel;
+                const barColor = level > 80 ? '#f44336' : level > 50 ? '#ff9800' : '#4caf50';
+                html += `
+                    <div class="info-row"><span class="label">Vulgraad</span><span><strong>${level}%</strong></span></div>
+                    <div class="fill-indicator"><div class="bar" style="width:${level}%;background:${barColor}"></div></div>
+                `;
+            }
+            
+            content.innerHTML = html;
+        }
+        
+        function updateMarkers() {
+            markerGroup.clearLayers();
+            markers = [];
+            const search = document.getElementById('search').value.toLowerCase();
+            let visible = 0;
+            
+            containers.forEach(container => {
+                if (!activeTypes.has(container.type || 'null')) return;
+                if (search && !(`${container.street} ${container.number}`.toLowerCase().includes(search))) return;
+                
+                const marker = createMarker(container);
+                markerGroup.addLayer(marker);
+                markers.push(marker);
+                visible++;
+            });
+            
+            document.getElementById('visible-count').textContent = visible;
+        }
+        
+        function buildLegend() {
+            const legend = document.getElementById('legend');
+            const typeCounts = {};
+            containers.forEach(c => {
+                const t = c.type || 'null';
+                typeCounts[t] = (typeCounts[t] || 0) + 1;
+            });
+            
+            let html = '<h3>Fracties</h3>';
+            Object.entries(typeCounts)
+                .sort((a, b) => b[1] - a[1])
+                .forEach(([type, count]) => {
+                    activeTypes.add(type);
+                    const color = TYPE_COLORS[type] || '#666';
+                    html += `
+                        <div class="legend-item" data-type="${type}" onclick="toggleType('${type}')">
+                            <div class="legend-dot" style="background:${color}"></div>
+                            <span class="legend-label">${type === 'null' ? 'Onbekend' : type}</span>
+                            <span class="legend-count">${count}</span>
+                        </div>
+                    `;
+                });
+            legend.innerHTML = html;
+        }
+        
+        function toggleType(type) {
+            const item = document.querySelector(`.legend-item[data-type="${type}"]`);
+            if (activeTypes.has(type)) {
+                activeTypes.delete(type);
+                item.classList.add('inactive');
+            } else {
+                activeTypes.add(type);
+                item.classList.remove('inactive');
+            }
+            updateMarkers();
+        }
+        
+        function updateStats() {
+            document.getElementById('total-count').textContent = containers.length;
+            const types = new Set(containers.map(c => c.type).filter(Boolean));
+            document.getElementById('type-count').textContent = types.size;
+            const streets = new Set(containers.map(c => c.street).filter(Boolean));
+            document.getElementById('street-count').textContent = streets.size;
+        }
+        
+        // Try to fetch live fill rate data from Burgerportaal API
+        async function fetchLiveData() {
+            const btn = document.querySelector('.refresh-btn');
+            btn.textContent = '⏳ Ophalen...';
+            btn.disabled = true;
+            
+            try {
+                const API_KEY = 'AIzaSyA6NkRqJypTfP-cjWzrZNFJzPUbBaGjOdk';
+                const ORG_ID = '138204213565303512';
+                
+                // Get anonymous auth token
+                const signupResp = await fetch(
+                    `https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=${API_KEY}`,
+                    { method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}' }
+                );
+                const signup = await signupResp.json();
+                const token = signup.idToken;
+                
+                // Try to query Firestore locations collection
+                const firestoreUrl = `https://firestore.googleapis.com/v1/projects/burgerportaal-production/databases/(default)/documents/organisations/${ORG_ID}/locations`;
+                const fsResp = await fetch(firestoreUrl, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const fsData = await fsResp.json();
+                
+                if (fsData.documents && fsData.documents.length > 0) {
+                    // Update containers with fill level data
+                    const badge = document.querySelector('.status-badge');
+                    badge.className = 'status-badge live';
+                    badge.textContent = 'Live Data';
+                    
+                    fsData.documents.forEach(doc => {
+                        const fields = doc.fields || {};
+                        const containerNum = fields.containerNumber?.stringValue;
+                        const fillLevel = fields.containerFillLevel?.integerValue || fields.containerFillLevel?.doubleValue;
+                        
+                        if (containerNum && fillLevel !== undefined) {
+                            const match = containers.find(c => c.number === containerNum);
+                            if (match) {
+                                match.fillLevel = parseFloat(fillLevel);
+                            }
+                        }
+                    });
+                    updateMarkers();
+                    alert(`✅ ${fsData.documents.length} containers met vulgraad data geladen!`);
+                } else {
+                    alert('⚠️ Geen live vulgraad data beschikbaar.\n\nDe Burgerportaal API synchroniseert vulgraad data niet continu. Open de Burgerportaal app op je telefoon en ga naar de kaart om de sync te triggeren.');
+                }
+            } catch (err) {
+                console.error('Fill rate fetch error:', err);
+                alert('❌ Kon geen live data ophalen: ' + err.message);
+            } finally {
+                btn.textContent = '🔄 Refresh Fill Rates';
+                btn.disabled = false;
+            }
+        }
+        
+        // Load container data
+        async function init() {
+            try {
+                const resp = await fetch('data/containers.json');
+                containers = await resp.json();
+            } catch {
+                // Fallback: fetch directly from ArcGIS
+                const url = 'https://services1.arcgis.com/p5QhXC0i0sZjprM1/arcgis/rest/services/kaart_Ondergrondse_containers_Assen_weergave_NV/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&returnGeometry=true&resultRecordCount=1000&f=json';
+                const resp = await fetch(url);
+                const data = await resp.json();
+                containers = data.features.map(f => ({
+                    id: f.attributes.OBJECTID,
+                    number: f.attributes.Nummer_,
+                    street: f.attributes.Straat,
+                    type: f.attributes.Type__,
+                    subtype: f.attributes.Subtype_,
+                    condition: f.attributes.Staat_,
+                    color: f.attributes.Kleur_,
+                    supplier: f.attributes.Leverancier_,
+                    lat: f.geometry.y,
+                    lng: f.geometry.x,
+                }));
+            }
+            
+            updateStats();
+            buildLegend();
+            updateMarkers();
+        }
+        
+        document.getElementById('search').addEventListener('input', updateMarkers);
+        init();
+    </script>
+</body>
+</html>

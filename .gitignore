@@ -1,5 +1,5 @@
-# Data files (fetched from API)
-data/
+# Data files are committed for GitHub Pages deployment
+# data/
 
 # Python
 __pycache__/
