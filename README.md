@@ -20,8 +20,19 @@ See [docs/api.md](docs/api.md) for full endpoint documentation.
 |------|--------|--------|
 | Collection schedule (GFT, PAPIER, PMD) | ✅ Working | HTTP API |
 | Address lookup | ✅ Working | HTTP API |
-| Container fill levels | ❌ Not accessible | Mendix credentials required |
+| Container fill levels | ⚠️ Blocked | Mendix sync stopped; Firestore empty |
 | Waste guide/fractions | ❌ Not found | Endpoint not exposed |
+| Container locations (static) | ✅ Working | ArcGIS open data (469 containers) |
+
+## Live Dashboard
+
+The dashboard at [GitHub Pages](https://graafg.github.io/assen-afvalmonitor/) shows:
+- All 469 underground container locations in Assen (from ArcGIS open data)
+- Container type (Restafval, BIO, Papier, Glas, PMD, Kleding)
+- Container condition and metadata
+
+**Fill rates** are currently unavailable because the Mendix → Firestore sync has stopped.
+See [docs/api.md](docs/api.md) for technical details on what would be needed to restore them.
 
 ## Related Projects
 

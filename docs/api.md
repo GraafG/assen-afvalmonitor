@@ -126,24 +126,50 @@ GET /exposed/v2/organisations/{orgId}/address/{addressId}/calendar
 
 ## Container Fill Levels (Not Publicly Accessible)
 
-The app shows underground container fill levels on a map. This data flows through:
+The app shows underground container fill levels on a map (e.g., "Vulgraad: 62.0%"). This data flows through:
 
 1. **Mendix OData API** (`https://21qubz.mendixcloud.com/odata/Locations` and `/odata/Containers`)
 2. **Cloud Function sync** → writes to Firestore
 3. **Firestore real-time stream** → `organisations/{orgId}/locations` collection
+4. **App reads** via geo-hash queries on the Firestore collection
 
-The Mendix API requires authentication:
-- Username: `21burger-mobile`
-- Password: stored in Firebase Secret Manager as `QUBZ_SAAS_PROD_API_PASSWORD`
+### Current Status (June 2026)
 
-The Firestore collection is accessible to read but currently empty (sync not active or data is ephemeral).
+⚠️ **The Firestore `locations` collection is EMPTY across all municipalities.** The sync from Mendix to Firestore appears to have stopped. The app still shows fill rates from locally cached data (Firestore offline persistence), but no new data is available server-side.
 
-**Container document fields** (from binary analysis):
+### Infrastructure Details
+
+**Mendix Production** (`https://21qubz.mendixcloud.com`):
+- OData endpoints: `/odata/Locations`, `/odata/Containers` → **403** (blocked at nginx level, likely IP-whitelisted for Cloud Functions only)
+- XAS runtime: Anonymous session possible (`get_session_data` works) but data retrieval returns 401
+- REST docs: 403 (not accessible)
+- Web pages: `/p/containeroverview`, `/p/containers`, `/p/vulgraad` exist (require login)
+- API user: `21burger-mobile`, password in Firebase Secret Manager as `QUBZ_SAAS_PROD_API_PASSWORD`
+
+**Mendix Acceptance** (`https://21burgerportaal-accp.mendixcloud.com`):
+- OData endpoints: **404** (not deployed in acceptance)
+- REST docs: `/rest-doc/` accessible, lists `MeldingType` and `PaymentWebhook` services (no container data)
+- Web pages: `/p/containeroverview`, `/p/containers`, `/p/locaties`, `/p/vulgraad` exist (require login)
+- XAS: Anonymous session works but data retrieval returns 401
+
+**Burgerportaal Portal** (`https://21burgerportaal.mendixcloud.com`):
+- Referenced as `BURGER_HOST` in qubz constants
+- Same XAS behavior (anonymous session, no data access)
+
+### Container Document Fields (from binary analysis)
+
 - `containerNumber` - Container ID
 - `containerFillLevel` - Fill percentage (0-100%)
 - `position.geohash` - Geohash for geo-queries
 - `fraction` / `Fractie` - Waste type
 - `containerType` - e.g., "verzamelcontainer" (underground collection container)
+
+### What Would Be Needed
+
+To access live fill rate data, one would need either:
+1. The `QUBZ_SAAS_PROD_API_PASSWORD` (to call Mendix OData directly)
+2. The Firestore sync to be re-enabled (so the collection populates again)
+3. A new API endpoint on the Cloud Functions (currently none exposed for containers)
 
 ## Home Assistant Integration
 
