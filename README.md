@@ -1,41 +1,76 @@
 # Assen Afvalmonitor
 
-Waste collection monitoring dashboard for Gemeente Assen, built by reverse-engineering the Burgerportaal app (by Qubz21).
+Live underground container fill rate monitoring dashboard for Gemeente Assen, built by reverse-engineering the Burgerportaal app (by Qubz21).
+
+**🌐 [Live Dashboard](https://graafg.github.io/assen-afvalmonitor/)**
+
+## What it does
+
+- Monitors **606 underground waste containers** across Assen
+- Shows **live fill rates** (vulgraad %) updated every 4 hours
+- Interactive map with clustering, filtering by fractie/sensor/fill level
+- Dark/light mode auto-detection
+- Change log with emptied-container detection
 
 ## Architecture
 
-The Burgerportaal app uses:
-- **Firebase Anonymous Auth** for API access (no user account needed)
-- **Cloud Functions** (`/exposed` and `/exposed/v2`) proxying a Mendix backend
-- **Firestore** for real-time container fill level data (geo-queried)
-- **Mendix OData** as the ultimate data source (`21qubz.mendixcloud.com`)
+```
+Burgerportaal Mendix Web App (21burgerportaal.mendixcloud.com)
+        │
+        ▼  Playwright browser automation
+GitHub Actions (every 4 hours)
+        │
+        ▼  Commits data/containers_fillrates.json
+GitHub Pages (static dashboard)
+```
 
-## API Documentation
-
-See [docs/api.md](docs/api.md) for full endpoint documentation.
+The Mendix XAS protocol requires client-side hash computation, so direct API calls don't work. Instead, we use **Playwright** to automate the web portal and intercept the XAS response containing all container data.
 
 ## Available Data
 
 | Data | Status | Method |
 |------|--------|--------|
+| Container fill levels (606 containers) | ✅ Working | Playwright + Mendix XAS |
+| Container locations + sensor status | ✅ Working | Playwright + Mendix XAS |
 | Collection schedule (GFT, PAPIER, PMD) | ✅ Working | HTTP API |
 | Address lookup | ✅ Working | HTTP API |
-| Container fill levels | ⚠️ Blocked | Mendix sync stopped; Firestore empty |
-| Waste guide/fractions | ❌ Not found | Endpoint not exposed |
-| Container locations (static) | ✅ Working | ArcGIS open data (469 containers) |
 
-## Live Dashboard
+## Container Data Fields
 
-The dashboard at [GitHub Pages](https://graafg.github.io/assen-afvalmonitor/) shows:
-- All 469 underground container locations in Assen (from ArcGIS open data)
-- Container type (Restafval, BIO, Papier, Glas, PMD, Kleding)
-- Container condition and metadata
+Each container provides: `ContainerNummer`, `Latitude`, `Longitude`, `Vulgraad` (fill %), `AdresVolledig`, `FractieKleur`, `HeeftSensor`.
 
-**Fill rates** are currently unavailable because the Mendix → Firestore sync has stopped.
-See [docs/api.md](docs/api.md) for technical details on what would be needed to restore them.
+**Fracties:** Restafval (grey), GFT (green), Papier (blue), PMD (orange), Glas (skyblue)
+
+## Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/fetch_fillrates.py` | Fetch current fill rates (runs in CI) |
+| `scripts/collect_timeseries.py` | Monitor changes over time (local use) |
+| `scripts/fetch_calendar.py` | Fetch collection schedules |
+
+### Running locally
+
+```bash
+pip install playwright
+playwright install chromium
+
+# Single fetch
+python scripts/fetch_fillrates.py
+
+# Monitor changes (every 60s for 1 hour)
+python scripts/collect_timeseries.py --interval 60 --duration 3600
+```
+
+## API Documentation
+
+See [docs/api.md](docs/api.md) for full endpoint and protocol documentation.
+
+## GitHub Actions
+
+The workflow runs every 4 hours (`0 */4 * * *`), fetches fresh data, commits to `main`, and deploys to GitHub Pages. All timestamps use `Europe/Amsterdam` timezone.
 
 ## Related Projects
 
-- [homeassistant-afvalwijzer](https://github.com/xirixiz/homeassistant-afvalwijzer) - HA integration that already supports Burgerportaal calendar
+- [homeassistant-afvalwijzer](https://github.com/xirixiz/homeassistant-afvalwijzer) - HA integration for Burgerportaal calendar
 - [assen-meldingen](https://github.com/GraafG/assen-meldingen) - Similar dashboard for Assen public complaints
-- [tripper-deals](https://graafg.github.io/tripper-deals/) - UI template reference
