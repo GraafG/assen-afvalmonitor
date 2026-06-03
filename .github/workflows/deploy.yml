@@ -2,7 +2,7 @@ name: Update Data & Deploy
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+    - cron: '0 */4 * * *'  # Every 4 hours
   workflow_dispatch:
   push:
     branches: [main]
@@ -28,6 +28,8 @@ jobs:
           playwright install chromium --with-deps
       
       - name: Fetch fill rate data
+        env:
+          TZ: Europe/Amsterdam
         run: python scripts/fetch_fillrates.py
       
       - name: Commit updated data

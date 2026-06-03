@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assen Afvalmonitor - Ondergrondse Containers</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <style>
         :root {
             --bg-body: #0f1419;
@@ -145,6 +147,54 @@
             .sidebar { width: 100%; min-width: unset; height: 40vh; border-right: none; border-top: 1px solid var(--border); }
             #map { height: 60vh; }
         }
+
+        .marker-cluster {
+            background-clip: padding-box;
+            border-radius: 20px;
+        }
+
+        .changelog { margin-top: 1rem; }
+        .changelog h3 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .changelog-entry {
+            padding: 0.5rem 0.6rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.8rem;
+            display: flex; align-items: flex-start; gap: 0.5rem;
+        }
+        .changelog-entry:last-child { border-bottom: none; }
+        .changelog-icon { font-size: 1.1rem; flex-shrink: 0; }
+        .changelog-body { flex: 1; }
+        .changelog-meta { color: var(--text-secondary); font-size: 0.7rem; margin-top: 0.15rem; }
+        .changelog-change { font-weight: 600; }
+        .changelog-change.drop { color: #4caf50; }
+        .changelog-change.rise { color: #ff6b35; }
+        .stale-badge { 
+            display: inline-block; background: #f44336; color: #fff;
+            font-size: 0.6rem; padding: 0.1rem 0.3rem; border-radius: 3px;
+            font-weight: 700; margin-left: 0.3rem; vertical-align: middle;
+        }
+        .filter-btn {
+            padding: 0.4rem 0.75rem; border: 1px solid var(--border);
+            background: var(--bg-card); color: var(--text-secondary);
+            border-radius: 6px; font-size: 0.8rem; cursor: pointer;
+            font-weight: 500; transition: all 0.15s;
+        }
+        .filter-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+        .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .marker-cluster div {
+            width: 38px; height: 38px;
+            margin-left: 6px; margin-top: 6px;
+            text-align: center; border-radius: 50%;
+            font: 14px "Segoe UI", sans-serif; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-strong);
+        }
+        .marker-cluster-small { background-color: rgba(29, 155, 240, 0.4); }
+        .marker-cluster-small div { background-color: rgba(29, 155, 240, 0.7); }
+        .marker-cluster-medium { background-color: rgba(255, 152, 0, 0.4); }
+        .marker-cluster-medium div { background-color: rgba(255, 152, 0, 0.7); }
+        .marker-cluster-large { background-color: rgba(244, 67, 54, 0.4); }
+        .marker-cluster-large div { background-color: rgba(244, 67, 54, 0.7); }
     </style>
 </head>
 <body>
@@ -180,6 +230,23 @@
                 <input type="text" class="search-input" id="search" placeholder="Zoek op straat of nummer...">
             </div>
             
+            <div class="filter-section">
+                <h3>Minimum vulgraad</h3>
+                <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <input type="range" id="fill-filter" min="0" max="100" value="0" style="flex:1; accent-color:var(--accent); height:28px;">
+                    <span id="fill-filter-label" style="min-width:3ch; font-weight:600;">0%</span>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Sensor</h3>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="filter-btn active" id="sensor-all" onclick="setSensorFilter('all')">Alle</button>
+                    <button class="filter-btn" id="sensor-yes" onclick="setSensorFilter('yes')">Met sensor</button>
+                    <button class="filter-btn" id="sensor-no" onclick="setSensorFilter('no')">Zonder sensor</button>
+                </div>
+            </div>
+            
             <div class="legend" id="legend">
                 <h3>Fracties</h3>
             </div>
@@ -188,12 +255,18 @@
                 <h3 id="info-title">Container</h3>
                 <div id="info-content"></div>
             </div>
+
+            <div class="changelog" id="changelog">
+                <h3>Recente wijzigingen</h3>
+                <div id="changelog-list"></div>
+            </div>
         </div>
         
         <div id="map"></div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script>
         const TYPE_COLORS = {
             'Restafval': '#ff6b35',
@@ -207,6 +280,7 @@
         let containers = [];
         let markers = [];
         let activeTypes = new Set();
+        let sensorFilter = 'all'; // 'all', 'yes', 'no'
         let map;
         let markerGroup;
         
@@ -232,18 +306,36 @@
             updateMarkers(); // refresh marker stroke colors
         });
         
-        markerGroup = L.layerGroup().addTo(map);
+        markerGroup = L.markerClusterGroup({
+            maxClusterRadius: 60,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            spiderfyDistanceMultiplier: 2,
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                let size = 'small';
+                let px = 50;
+                if (count > 20) { size = 'large'; px = 70; }
+                else if (count > 5) { size = 'medium'; px = 60; }
+                return L.divIcon({
+                    html: '<div><span>' + count + '</span></div>',
+                    className: 'marker-cluster marker-cluster-' + size,
+                    iconSize: L.point(px, px)
+                });
+            }
+        }).addTo(map);
         
         function createMarker(container) {
             const color = TYPE_COLORS[container.type] || TYPE_COLORS['Onbekend'];
             const fillLevel = container.fillLevel;
             
-            let radius = 7;
+            let radius = 12;
             let fillOpacity = 0.8;
             let tooltipExtra = '';
             
             if (fillLevel !== undefined && fillLevel !== null) {
-                radius = 5 + (fillLevel / 100) * 6;
+                radius = 10 + (fillLevel / 100) * 10;
                 fillOpacity = 0.4 + (fillLevel / 100) * 0.5;
                 tooltipExtra = `<br>Vulgraad: <strong>${fillLevel}%</strong>`;
             }
@@ -298,11 +390,15 @@
             markerGroup.clearLayers();
             markers = [];
             const search = document.getElementById('search').value.toLowerCase();
+            const minFill = parseInt(document.getElementById('fill-filter').value) || 0;
             let visible = 0;
             
             containers.forEach(container => {
                 if (!activeTypes.has(container.type || 'Onbekend')) return;
                 if (search && !(`${container.street || container.adres || ''} ${container.number}`.toLowerCase().includes(search))) return;
+                if (minFill > 0 && (container.fillLevel === undefined || container.fillLevel === null || container.fillLevel < minFill)) return;
+                if (sensorFilter === 'yes' && !container.heeftSensor) return;
+                if (sensorFilter === 'no' && container.heeftSensor) return;
                 
                 const marker = createMarker(container);
                 markerGroup.addLayer(marker);
@@ -398,9 +494,67 @@
             updateStats();
             buildLegend();
             updateMarkers();
+            
+            // Load change events
+            try {
+                const evResp = await fetch('data/events_mock.json');
+                const events = await evResp.json();
+                renderChangelog(events);
+            } catch {}
+        }
+        
+        function renderChangelog(events) {
+            const list = document.getElementById('changelog-list');
+            const now = new Date();
+            const STALE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+            
+            let html = '';
+            const shown = events.slice(0, 30);
+            
+            for (const ev of shown) {
+                const date = new Date(ev.ts);
+                const diff = ev.to - ev.from;
+                const isDrop = diff < -20;
+                const isRise = diff > 0;
+                const icon = isDrop ? '😊' : (isRise ? '📈' : '➡️');
+                const cls = isDrop ? 'drop' : (isRise ? 'rise' : '');
+                const sign = diff > 0 ? '+' : '';
+                
+                // Stale detection
+                const age = now - date;
+                const staleTag = age > STALE_MS ? '<span class="stale-badge">STALE &gt;7d</span>' : '';
+                
+                const timeStr = date.toLocaleString('nl-NL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                
+                html += `
+                    <div class="changelog-entry">
+                        <span class="changelog-icon">${icon}</span>
+                        <div class="changelog-body">
+                            <div><strong>${ev.nr}</strong> — ${ev.adres || ''} ${staleTag}</div>
+                            <div><span class="changelog-change ${cls}">${ev.from}% → ${ev.to}% (${sign}${diff}%)</span> · ${ev.fractie}</div>
+                            <div class="changelog-meta">${timeStr}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            list.innerHTML = html || '<div style="color:var(--text-secondary);padding:0.5rem;">Geen wijzigingen</div>';
         }
         
         document.getElementById('search').addEventListener('input', updateMarkers);
+        const fillFilter = document.getElementById('fill-filter');
+        fillFilter.addEventListener('input', () => {
+            document.getElementById('fill-filter-label').textContent = fillFilter.value + '%';
+            updateMarkers();
+        });
+
+        function setSensorFilter(mode) {
+            sensorFilter = mode;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('sensor-' + mode).classList.add('active');
+            updateMarkers();
+        }
+
         init();
     </script>
 </body>
