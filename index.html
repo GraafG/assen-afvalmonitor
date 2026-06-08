@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assen Afvalmonitor - Ondergrondse Containers</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <style>
         :root {
             --bg-body: #0f1419;
@@ -148,11 +146,6 @@
             #map { height: 60vh; }
         }
 
-        .marker-cluster {
-            background-clip: padding-box;
-            border-radius: 20px;
-        }
-
         .changelog { margin-top: 1rem; }
         .changelog h3 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
         .changelog-entry {
@@ -181,20 +174,16 @@
         }
         .filter-btn:hover { border-color: var(--accent); color: var(--text-primary); }
         .filter-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-        .marker-cluster div {
-            width: 38px; height: 38px;
-            margin-left: 6px; margin-top: 6px;
-            text-align: center; border-radius: 50%;
-            font: 14px "Segoe UI", sans-serif; font-weight: 700;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text-strong);
+
+        .history-panel {
+            margin-top: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
         }
-        .marker-cluster-small { background-color: rgba(29, 155, 240, 0.4); }
-        .marker-cluster-small div { background-color: rgba(29, 155, 240, 0.7); }
-        .marker-cluster-medium { background-color: rgba(255, 152, 0, 0.4); }
-        .marker-cluster-medium div { background-color: rgba(255, 152, 0, 0.7); }
-        .marker-cluster-large { background-color: rgba(244, 67, 54, 0.4); }
-        .marker-cluster-large div { background-color: rgba(244, 67, 54, 0.7); }
+        .history-panel h3 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .history-panel canvas { width: 100% !important; height: 180px !important; }
     </style>
 </head>
 <body>
@@ -256,6 +245,11 @@
                 <div id="info-content"></div>
             </div>
 
+            <div class="history-panel" id="history-panel">
+                <h3>Vulgraad historie (30 dagen)</h3>
+                <canvas id="history-chart"></canvas>
+            </div>
+
             <div class="changelog" id="changelog">
                 <h3>Recente wijzigingen</h3>
                 <div id="changelog-list"></div>
@@ -266,7 +260,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
     <script>
         const TYPE_COLORS = {
             'Restafval': '#ff6b35',
@@ -306,25 +300,7 @@
             updateMarkers(); // refresh marker stroke colors
         });
         
-        markerGroup = L.markerClusterGroup({
-            maxClusterRadius: 60,
-            spiderfyOnMaxZoom: true,
-            showCoverageOnHover: false,
-            zoomToBoundsOnClick: true,
-            spiderfyDistanceMultiplier: 2,
-            iconCreateFunction: function(cluster) {
-                const count = cluster.getChildCount();
-                let size = 'small';
-                let px = 50;
-                if (count > 20) { size = 'large'; px = 70; }
-                else if (count > 5) { size = 'medium'; px = 60; }
-                return L.divIcon({
-                    html: '<div><span>' + count + '</span></div>',
-                    className: 'marker-cluster marker-cluster-' + size,
-                    iconSize: L.point(px, px)
-                });
-            }
-        }).addTo(map);
+        markerGroup = L.layerGroup().addTo(map);
         
         function createMarker(container) {
             const color = TYPE_COLORS[container.type] || TYPE_COLORS['Onbekend'];
@@ -384,6 +360,11 @@
             }
             
             content.innerHTML = html;
+            
+            // Update chart to show this container's history
+            if (historyData) {
+                renderContainerHistory(container.number);
+            }
         }
         
         function updateMarkers() {
@@ -501,6 +482,13 @@
                 const events = await evResp.json();
                 renderChangelog(events);
             } catch {}
+
+            // Load history and render chart
+            try {
+                const histResp = await fetch('data/history_mock.json');
+                const histData = await histResp.json();
+                renderHistoryChart(histData);
+            } catch {}
         }
         
         function renderChangelog(events) {
@@ -539,6 +527,131 @@
             }
             
             list.innerHTML = html || '<div style="color:var(--text-secondary);padding:0.5rem;">Geen wijzigingen</div>';
+        }
+        
+        let historyChart = null;
+        let historyData = null; // loaded once, used per-container
+        
+        function renderHistoryChart(data, containerNr) {
+            historyData = data;
+            if (containerNr) {
+                renderContainerHistory(containerNr);
+            } else {
+                // Default: show all samples
+                renderMultiHistory(data);
+            }
+        }
+        
+        function renderContainerHistory(nr) {
+            if (!historyData) return;
+            const ctx = document.getElementById('history-chart').getContext('2d');
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+            const textColor = isDark ? '#71767b' : '#5b6570';
+            
+            // Get history for this specific container
+            const points = historyData.history
+                .filter(h => h.containers[nr] !== undefined)
+                .map(h => ({ ts: h.ts, val: h.containers[nr] }));
+            
+            if (points.length === 0) {
+                // No history for this container - show message
+                if (historyChart) historyChart.destroy();
+                historyChart = null;
+                document.getElementById('history-chart').parentElement.querySelector('h3').textContent = 
+                    'Vulgraad historie — #' + nr + ' (geen data)';
+                return;
+            }
+            
+            const labels = points.map(p => {
+                const d = new Date(p.ts);
+                return d.toLocaleString('nl-NL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+            });
+            
+            const container = containers.find(c => c.number === nr);
+            const color = TYPE_COLORS[container ? container.type : 'Onbekend'] || '#1d9bf0';
+            
+            if (historyChart) historyChart.destroy();
+            
+            document.getElementById('history-chart').parentElement.querySelector('h3').textContent = 
+                'Vulgraad historie — #' + nr;
+            
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: nr,
+                        data: points.map(p => p.val),
+                        borderColor: color,
+                        backgroundColor: color + '33',
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 6,
+                        tension: 0.3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ctx.parsed.y + '%' } }
+                    },
+                    scales: {
+                        x: { display: true, ticks: { color: textColor, maxTicksLimit: 6, font: { size: 9 } }, grid: { color: gridColor } },
+                        y: { display: true, min: 0, max: 100, ticks: { color: textColor, callback: v => v + '%' }, grid: { color: gridColor } },
+                    }
+                }
+            });
+        }
+        
+        function renderMultiHistory(data) {
+            const ctx = document.getElementById('history-chart').getContext('2d');
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+            const textColor = isDark ? '#71767b' : '#5b6570';
+            
+            document.getElementById('history-chart').parentElement.querySelector('h3').textContent = 
+                'Vulgraad historie (30 dagen)';
+            
+            const labels = data.history.map(h => {
+                const d = new Date(h.ts);
+                return d.toLocaleString('nl-NL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+            });
+            
+            const chartColors = ['#ff6b35','#4caf50','#2196f3','#9c27b0','#ff9800','#00bcd4','#e91e63','#8bc34a'];
+            
+            const datasets = data.samples.map((sample, i) => ({
+                label: sample.nr + ' (' + sample.fractie + ')',
+                data: data.history.map(h => h.containers[sample.nr] || null),
+                borderColor: chartColors[i % chartColors.length],
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.3,
+            }));
+            
+            if (historyChart) historyChart.destroy();
+            
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { display: true, position: 'bottom', labels: { color: textColor, boxWidth: 10, font: { size: 10 } } },
+                    },
+                    scales: {
+                        x: { display: true, ticks: { color: textColor, maxTicksLimit: 8, font: { size: 9 } }, grid: { color: gridColor } },
+                        y: { display: true, min: 0, max: 100, ticks: { color: textColor, callback: v => v + '%' }, grid: { color: gridColor } },
+                    }
+                }
+            });
         }
         
         document.getElementById('search').addEventListener('input', updateMarkers);
