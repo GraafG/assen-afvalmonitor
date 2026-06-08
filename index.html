@@ -476,19 +476,75 @@
             buildLegend();
             updateMarkers();
             
-            // Load change events
+            // Load history: try real data first, fall back to mock
             try {
-                const evResp = await fetch('data/events_mock.json');
-                const events = await evResp.json();
-                renderChangelog(events);
-            } catch {}
-
-            // Load history and render chart
-            try {
-                const histResp = await fetch('data/history_mock.json');
-                const histData = await histResp.json();
+                let histData;
+                try {
+                    const realResp = await fetch('data/history.json');
+                    if (realResp.ok) {
+                        histData = await realResp.json();
+                        if (histData.history.length < 2) throw new Error('not enough data');
+                    } else throw new Error('no real history');
+                } catch {
+                    const mockResp = await fetch('data/history_mock.json');
+                    histData = await mockResp.json();
+                }
                 renderHistoryChart(histData);
             } catch {}
+            
+            // Load real events (from CI), fall back to deriving from history
+            try {
+                const evResp = await fetch('data/events.ndjson');
+                const evText = await evResp.text();
+                if (evText.trim()) {
+                    const events = evText.trim().split('\n').map(l => JSON.parse(l));
+                    events.sort((a, b) => b.ts.localeCompare(a.ts));
+                    renderChangelog(events.slice(0, 50));
+                } else {
+                    renderChangelogFromHistory();
+                }
+            } catch {
+                renderChangelogFromHistory();
+            }
+        }
+        
+        function renderChangelogFromHistory() {
+            if (!historyData) return;
+            const events = deriveChanges(historyData);
+            renderChangelog(events);
+        }
+        
+        function deriveChanges(histData) {
+            const events = [];
+            const history = histData.history;
+            
+            // Compare consecutive snapshots, collect all changes
+            for (let i = 1; i < history.length; i++) {
+                const prev = history[i - 1].containers;
+                const curr = history[i].containers;
+                const ts = history[i].ts;
+                
+                for (const nr of Object.keys(curr)) {
+                    if (prev[nr] === undefined) continue;
+                    const diff = Math.round((curr[nr] - prev[nr]) * 10) / 10;
+                    // Only log significant changes (>5% difference)
+                    if (Math.abs(diff) >= 5) {
+                        const container = containers.find(c => c.number === nr);
+                        events.push({
+                            ts,
+                            nr,
+                            adres: container ? container.adres : '',
+                            fractie: container ? container.type : '',
+                            from: Math.round(prev[nr]),
+                            to: Math.round(curr[nr])
+                        });
+                    }
+                }
+            }
+            
+            // Sort newest first, limit to 50
+            events.sort((a, b) => b.ts.localeCompare(a.ts));
+            return events.slice(0, 50);
         }
         
         function renderChangelog(events) {
