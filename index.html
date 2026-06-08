@@ -621,7 +621,7 @@
             
             const labels = points.map(p => {
                 const d = new Date(p.ts);
-                return d.toLocaleString('nl-NL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                return d.toLocaleString('nl-NL', {day:'numeric', month:'short'});
             });
             
             const container = containers.find(c => c.number === nr);
@@ -629,8 +629,11 @@
             
             if (historyChart) historyChart.destroy();
             
+            const span = points.length > 1 
+                ? Math.round((new Date(points[points.length-1].ts) - new Date(points[0].ts)) / 86400000) 
+                : 0;
             document.getElementById('history-chart').parentElement.querySelector('h3').textContent = 
-                'Vulgraad historie — #' + nr;
+                'Vulgraad historie — #' + nr + (span > 0 ? ' (afgelopen ' + span + ' dagen)' : '');
             
             historyChart = new Chart(ctx, {
                 type: 'line',
@@ -670,12 +673,15 @@
             const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
             const textColor = isDark ? '#71767b' : '#5b6570';
             
+            const span = data.history.length > 1 
+                ? Math.round((new Date(data.history[data.history.length-1].ts) - new Date(data.history[0].ts)) / 86400000) 
+                : 0;
             document.getElementById('history-chart').parentElement.querySelector('h3').textContent = 
-                'Vulgraad historie (30 dagen)';
+                'Vulgraad historie (' + (span > 0 ? 'afgelopen ' + span + ' dagen' : 'alle data') + ')';
             
             const labels = data.history.map(h => {
                 const d = new Date(h.ts);
-                return d.toLocaleString('nl-NL', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                return d.toLocaleString('nl-NL', {day:'numeric', month:'short'});
             });
             
             const chartColors = ['#ff6b35','#4caf50','#2196f3','#9c27b0','#ff9800','#00bcd4','#e91e63','#8bc34a'];
