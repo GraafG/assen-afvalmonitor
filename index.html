@@ -184,6 +184,57 @@
         }
         .history-panel h3 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
         .history-panel canvas { width: 100% !important; height: 180px !important; }
+        .view-toggle {
+            position: fixed; top: 70px; right: 1rem;
+            display: flex; gap: 0; z-index: 1000;
+            border-radius: 6px; overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .view-toggle button {
+            padding: 0.5rem 1rem; border: none;
+            background: var(--bg-card); color: var(--text-secondary);
+            font-size: 0.8rem; font-weight: 600; cursor: pointer;
+        }
+        .view-toggle button.active { background: var(--accent); color: #fff; }
+
+        .table-view {
+            flex: 1; overflow-y: auto; display: none;
+            background: var(--bg-body);
+        }
+        .table-view.active { display: block; }
+        #map.hidden { display: none; }
+
+        .container-table {
+            width: 100%; border-collapse: collapse; font-size: 0.8rem;
+        }
+        .container-table th {
+            position: sticky; top: 0;
+            background: var(--bg-surface); color: var(--text-secondary);
+            text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;
+            padding: 0.6rem 0.75rem; text-align: left;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer; user-select: none;
+        }
+        .container-table th:hover { color: var(--accent); }
+        .container-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .container-table tr { cursor: pointer; transition: background 0.1s; }
+        .container-table tr:hover { background: var(--bg-card); }
+        .container-table .fill-cell {
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .container-table .fill-bar {
+            width: 50px; height: 6px; background: var(--fill-track);
+            border-radius: 3px; overflow: hidden;
+        }
+        .container-table .fill-bar-inner {
+            height: 100%; border-radius: 3px;
+        }
+        .fractie-dot {
+            width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -257,6 +308,25 @@
         </div>
         
         <div id="map"></div>
+        <div class="table-view" id="table-view">
+            <table class="container-table">
+                <thead>
+                    <tr>
+                        <th data-sort="number">#</th>
+                        <th data-sort="street">Adres</th>
+                        <th data-sort="type">Fractie</th>
+                        <th data-sort="fillLevel">Vulgraad</th>
+                        <th data-sort="heeftSensor">Sensor</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="view-toggle">
+        <button id="view-map" class="active" onclick="setView('map')">🗺️ Kaart</button>
+        <button id="view-table" onclick="setView('table')">📋 Tabel</button>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -476,20 +546,15 @@
             buildLegend();
             updateMarkers();
             
-            // Load history: try real data first, fall back to mock
+            // Load history: real data only
             try {
-                let histData;
-                try {
-                    const realResp = await fetch('data/history.json');
-                    if (realResp.ok) {
-                        histData = await realResp.json();
-                        if (histData.history.length < 42) throw new Error('not enough data');
-                    } else throw new Error('no real history');
-                } catch {
-                    const mockResp = await fetch('data/history_mock.json');
-                    histData = await mockResp.json();
+                const realResp = await fetch('data/history.json');
+                if (realResp.ok) {
+                    const histData = await realResp.json();
+                    if (histData.history && histData.history.length > 0) {
+                        renderHistoryChart(histData);
+                    }
                 }
-                renderHistoryChart(histData);
             } catch {}
             
             // Load real events (from CI), fall back to deriving from history
@@ -729,6 +794,64 @@
             document.getElementById('sensor-' + mode).classList.add('active');
             updateMarkers();
         }
+
+        function setView(mode) {
+            document.getElementById('view-map').classList.toggle('active', mode === 'map');
+            document.getElementById('view-table').classList.toggle('active', mode === 'table');
+            document.getElementById('map').classList.toggle('hidden', mode === 'table');
+            document.getElementById('table-view').classList.toggle('active', mode === 'table');
+            if (mode === 'map') map.invalidateSize();
+            if (mode === 'table') renderTable();
+        }
+
+        let tableSortKey = 'fillLevel';
+        let tableSortAsc = false;
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            const sorted = [...containers].sort((a, b) => {
+                let av = a[tableSortKey], bv = b[tableSortKey];
+                if (av == null) av = -1;
+                if (bv == null) bv = -1;
+                if (typeof av === 'string') return tableSortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
+                return tableSortAsc ? av - bv : bv - av;
+            });
+
+            tbody.innerHTML = sorted.map(c => {
+                const level = c.fillLevel ?? '-';
+                const color = TYPE_COLORS[c.type] || '#666';
+                const barColor = level > 80 ? '#f44336' : level > 50 ? '#ff9800' : '#4caf50';
+                const barWidth = typeof level === 'number' ? level : 0;
+                return `<tr data-nr="${c.number}">
+                    <td><strong>${c.number}</strong></td>
+                    <td>${c.street || c.adres || '-'}</td>
+                    <td><span class="fractie-dot" style="background:${color}"></span> ${c.type || '-'}</td>
+                    <td><div class="fill-cell"><div class="fill-bar"><div class="fill-bar-inner" style="width:${barWidth}%;background:${barColor}"></div></div> ${typeof level === 'number' ? level + '%' : '-'}</div></td>
+                    <td>${c.heeftSensor ? '✅' : '❌'}</td>
+                </tr>`;
+            }).join('');
+
+            tbody.querySelectorAll('tr').forEach(row => {
+                row.addEventListener('click', () => {
+                    const nr = row.dataset.nr;
+                    const container = containers.find(c => c.number === nr);
+                    if (container) {
+                        setView('map');
+                        map.setView([container.lat, container.lng], 17);
+                        showInfo(container);
+                    }
+                });
+            });
+        }
+
+        document.querySelectorAll('.container-table th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                const key = th.dataset.sort;
+                if (tableSortKey === key) tableSortAsc = !tableSortAsc;
+                else { tableSortKey = key; tableSortAsc = false; }
+                renderTable();
+            });
+        });
 
         init();
     </script>
