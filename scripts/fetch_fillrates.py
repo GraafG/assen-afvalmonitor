@@ -157,6 +157,12 @@ def main():
     output_dir = Path(__file__).parent.parent / "data"
     output_dir.mkdir(exist_ok=True)
     output_file = output_dir / "containers_fillrates.json"
+    state_file = output_dir / "state.json"
+    events_file = output_dir / "events.ndjson"
+    history_file = output_dir / "history.json"
+
+    ams_tz = ZoneInfo("Europe/Amsterdam")
+    now_ams = datetime.now(ams_tz)
 
     print("Fetching container fill rates from Burgerportaal...\n")
 
@@ -173,9 +179,60 @@ def main():
             print("\n!! Response received but no containers parsed!")
             sys.exit(1)
 
-        # Save
+        # Save full data
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(locaties, f, indent=2, ensure_ascii=False)
+
+        # Build current state {nr: vulgraad}
+        current_state = {l["nr"]: l["vulgraad"] for l in locaties if l["nr"]}
+
+        # Load previous state and diff
+        prev_state = {}
+        if state_file.exists():
+            with open(state_file) as f:
+                prev_state = json.load(f)
+
+        # Detect changes
+        changes = []
+        for nr, val in current_state.items():
+            prev_val = prev_state.get(nr)
+            if prev_val is not None and prev_val != val:
+                loc = next((l for l in locaties if l["nr"] == nr), None)
+                changes.append({
+                    "ts": now_ams.isoformat(),
+                    "nr": nr,
+                    "adres": loc["adres"] if loc else "",
+                    "fractie": loc["fractie"] if loc else "",
+                    "from": prev_val,
+                    "to": val,
+                })
+
+        # Append changes to events log
+        if changes:
+            with open(events_file, "a", encoding="utf-8") as f:
+                for ev in changes:
+                    f.write(json.dumps(ev, separators=(",", ":"), ensure_ascii=False) + "\n")
+            print(f"   Changes detected: {len(changes)} containers changed")
+
+        # Save current state
+        with open(state_file, "w") as f:
+            json.dump(current_state, f, separators=(",", ":"))
+
+        # Update rolling history (append snapshot, keep last 30 days = 180 points at 4h)
+        snapshot = {"ts": now_ams.isoformat(), "containers": current_state}
+        hist = {"samples": [], "history": []}
+        if history_file.exists():
+            with open(history_file) as f:
+                hist = json.load(f)
+        hist["history"].append(snapshot)
+        # Keep max 180 snapshots (30 days at 4h intervals)
+        hist["history"] = hist["history"][-180:]
+        # Update samples (first 8 containers with sensor + data)
+        if not hist["samples"]:
+            samples = [l for l in locaties if l["heeftSensor"] and l["vulgraad"] > 0][:8]
+            hist["samples"] = [{"nr": s["nr"], "adres": s["adres"], "fractie": s["fractie"]} for s in samples]
+        with open(history_file, "w") as f:
+            json.dump(hist, f, separators=(",", ":"), ensure_ascii=False)
 
         # Stats
         with_sensor = sum(1 for l in locaties if l["heeftSensor"])
@@ -187,8 +244,6 @@ def main():
 
         # Save metadata
         meta_file = output_dir / "meta.json"
-        ams_tz = ZoneInfo("Europe/Amsterdam")
-        now_ams = datetime.now(ams_tz)
         meta = {
             "source": "burgerportaal-mendix",
             "url": BASE_URL,
