@@ -483,7 +483,7 @@
                     const realResp = await fetch('data/history.json');
                     if (realResp.ok) {
                         histData = await realResp.json();
-                        if (histData.history.length < 2) throw new Error('not enough data');
+                        if (histData.history.length < 42) throw new Error('not enough data');
                     } else throw new Error('no real history');
                 } catch {
                     const mockResp = await fetch('data/history_mock.json');
