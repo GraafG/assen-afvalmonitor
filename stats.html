@@ -133,6 +133,13 @@
     </div>
 
     <div class="container">
+        <div class="section-title">📈 Gemiddelde vulgraad over tijd</div>
+        <div class="chart-card" style="margin-bottom:3rem;">
+            <h4 id="timeline-title">Vulgraad verloop</h4>
+            <canvas id="chart-timeline" style="max-height:300px;"></canvas>
+            <p style="font-size:0.7rem; color:var(--text-secondary); margin-top:0.75rem; text-align:center;" id="timeline-info"></p>
+        </div>
+
         <div class="section-title">🎯 Gemiddelde vulgraad per fractie</div>
         <div class="gauges-grid" id="gauges"></div>
 
@@ -234,6 +241,116 @@
             renderFacts(containers);
             renderCharts(containers);
             renderTopLists(containers);
+
+            // Load history for timeline
+            try {
+                const histResp = await fetch('data/history.json');
+                if (histResp.ok) {
+                    const histData = await histResp.json();
+                    if (histData.history && histData.history.length > 0) {
+                        renderTimeline(histData);
+                    } else {
+                        document.getElementById('timeline-info').textContent = 'Nog geen historische data beschikbaar. Data wordt elke 4 uur verzameld.';
+                    }
+                }
+            } catch {
+                document.getElementById('timeline-info').textContent = 'Historische data kon niet geladen worden.';
+            }
+        }
+
+        function renderTimeline(histData) {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const textColor = isDark ? '#71767b' : '#5b6570';
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+            const history = histData.history;
+            const span = Math.round((new Date(history[history.length-1].ts) - new Date(history[0].ts)) / 86400000);
+            document.getElementById('timeline-title').textContent = `Vulgraad verloop (${span > 0 ? span + ' dagen' : 'vandaag'})`;
+            document.getElementById('timeline-info').textContent = `${history.length} metingen · wordt elke 4 uur aangevuld`;
+
+            const labels = history.map(h => {
+                const d = new Date(h.ts);
+                return d.toLocaleString('nl-NL', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+            });
+
+            // Compute averages per fractie per snapshot
+            const fracties = Object.keys(TYPE_COLORS).filter(t => t !== 'Onbekend');
+            const containerTypes = {}; // nr -> fractie (from latest snapshot metadata or fallback)
+            // We need to know types - get from containers_fillrates
+            const typeMap = {};
+            histData.samples?.forEach(s => { typeMap[s.nr] = s.fractie; });
+
+            // If samples not available, load from current data
+            const datasets = [];
+
+            // Overall average
+            const overallAvg = history.map(h => {
+                const vals = Object.values(h.containers);
+                return vals.length ? Math.round(vals.reduce((a,b) => a+b, 0) / vals.length) : null;
+            });
+            datasets.push({
+                label: 'Totaal gemiddelde',
+                data: overallAvg,
+                borderColor: '#1d9bf0',
+                backgroundColor: '#1d9bf033',
+                fill: true,
+                borderWidth: 3,
+                pointRadius: history.length > 50 ? 0 : 3,
+                tension: 0.3,
+            });
+
+            // Per-fractie averages (using fractie_map or samples)
+            const fractieMap = histData.fractie_map || {};
+            const nrsByFractie = {};
+
+            if (Object.keys(fractieMap).length > 0) {
+                Object.entries(fractieMap).forEach(([nr, fractie]) => {
+                    if (!nrsByFractie[fractie]) nrsByFractie[fractie] = [];
+                    nrsByFractie[fractie].push(nr);
+                });
+            } else if (histData.samples && histData.samples.length > 0) {
+                histData.samples.forEach(s => {
+                    if (!nrsByFractie[s.fractie]) nrsByFractie[s.fractie] = [];
+                    nrsByFractie[s.fractie].push(s.nr);
+                });
+            }
+
+            fracties.forEach(fractie => {
+                const nrs = nrsByFractie[fractie];
+                if (!nrs || nrs.length < 5) return;
+                const avg = history.map(h => {
+                    const vals = nrs.map(nr => h.containers[nr]).filter(v => v != null);
+                    return vals.length ? Math.round(vals.reduce((a,b) => a+b, 0) / vals.length) : null;
+                });
+                datasets.push({
+                    label: fractie,
+                    data: avg,
+                    borderColor: TYPE_COLORS[fractie],
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    borderDash: [4, 2],
+                });
+            });
+
+            new Chart(document.getElementById('chart-timeline'), {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: textColor, boxWidth: 12, font: { size: 11 } } },
+                        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } },
+                    },
+                    scales: {
+                        x: { ticks: { color: textColor, maxTicksLimit: 10, font: { size: 9 } }, grid: { color: gridColor } },
+                        y: { min: 0, max: 100, ticks: { color: textColor, callback: v => v + '%' }, grid: { color: gridColor } },
+                    }
+                }
+            });
         }
 
         function renderGauges(containers) {
