@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assen Afvalmonitor - Statistieken</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <style>
+        :root {
+            --bg-body: #0f1419;
+            --bg-surface: #16202a;
+            --bg-card: #1d2a35;
+            --border: #2f3336;
+            --text-primary: #e7e9ea;
+            --text-secondary: #71767b;
+            --text-strong: #fff;
+            --accent: #1d9bf0;
+            --gauge-track: #2f3336;
+        }
+        @media (prefers-color-scheme: light) {
+            :root {
+                --bg-body: #f7f9fa;
+                --bg-surface: #ffffff;
+                --bg-card: #f0f3f5;
+                --border: #dce0e3;
+                --text-primary: #1a1a1a;
+                --text-secondary: #5b6570;
+                --text-strong: #000;
+                --accent: #0969da;
+                --gauge-track: #dce0e3;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-body); color: var(--text-primary); min-height: 100vh; }
+
+        .header {
+            padding: 1rem 1.5rem;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 1rem;
+        }
+        .header h1 { font-size: 1.25rem; font-weight: 600; }
+        .header .subtitle { color: var(--text-secondary); font-size: 0.85rem; }
+        .header a { color: var(--accent); text-decoration: none; font-size: 0.85rem; margin-left: auto; }
+        .header a:hover { text-decoration: underline; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        .section-title {
+            font-size: 1.1rem; font-weight: 700; margin-bottom: 1.5rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        /* Gauge meters */
+        .gauges-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem; margin-bottom: 3rem;
+        }
+        .gauge-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.25rem; text-align: center;
+        }
+        .gauge-card h4 { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+        .gauge-wrapper { position: relative; width: 120px; height: 70px; margin: 0 auto; }
+        .gauge-svg { width: 120px; height: 70px; }
+        .gauge-value {
+            position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+            font-size: 1.4rem; font-weight: 800; color: var(--text-strong);
+        }
+        .gauge-count { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem; }
+
+        /* Fun facts */
+        .facts-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem; margin-bottom: 3rem;
+        }
+        .fact-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.25rem;
+        }
+        .fact-card .emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+        .fact-card .fact-value { font-size: 1.8rem; font-weight: 800; color: var(--text-strong); }
+        .fact-card .fact-label { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem; }
+        .fact-card .fact-detail { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem; font-style: italic; }
+
+        /* Charts */
+        .charts-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 3rem;
+        }
+        @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
+        .chart-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.25rem;
+        }
+        .chart-card h4 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .chart-card canvas { max-height: 250px; }
+
+        /* Top lists */
+        .top-list { margin-bottom: 3rem; }
+        .top-list-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+        }
+        @media (max-width: 768px) { .top-list-grid { grid-template-columns: 1fr; } }
+        .top-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 1.25rem;
+        }
+        .top-card h4 { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .top-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.5rem 0; border-bottom: 1px solid var(--border);
+        }
+        .top-item:last-child { border-bottom: none; }
+        .top-rank { font-size: 1.1rem; font-weight: 800; color: var(--accent); min-width: 2ch; }
+        .top-info { flex: 1; }
+        .top-info .name { font-size: 0.85rem; font-weight: 600; }
+        .top-info .detail { font-size: 0.7rem; color: var(--text-secondary); }
+        .top-bar { width: 60px; height: 8px; background: var(--gauge-track); border-radius: 4px; overflow: hidden; }
+        .top-bar-inner { height: 100%; border-radius: 4px; }
+
+        .footer {
+            text-align: center; padding: 2rem;
+            color: var(--text-secondary); font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Statistieken</h1>
+        <span class="subtitle">Assen Afvalmonitor</span>
+        <a href="index.html">← Terug naar kaart</a>
+    </div>
+
+    <div class="container">
+        <div class="section-title">🎯 Gemiddelde vulgraad per fractie</div>
+        <div class="gauges-grid" id="gauges"></div>
+
+        <div class="section-title">🎲 Leuke feiten</div>
+        <div class="facts-grid" id="facts"></div>
+
+        <div class="section-title">📈 Verdeling</div>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h4>Vulgraad verdeling</h4>
+                <canvas id="chart-distribution"></canvas>
+            </div>
+            <div class="chart-card">
+                <h4>Containers per fractie</h4>
+                <canvas id="chart-fracties"></canvas>
+            </div>
+        </div>
+
+        <div class="section-title">🏆 Top 10</div>
+        <div class="top-list">
+            <div class="top-list-grid">
+                <div class="top-card">
+                    <h4>🔥 Volste containers</h4>
+                    <div id="top-full"></div>
+                </div>
+                <div class="top-card">
+                    <h4>🌱 Leegste containers</h4>
+                    <div id="top-empty"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">🏘️ Drukste straten</div>
+        <div class="charts-grid">
+            <div class="top-card">
+                <h4>Hoogste gemiddelde vulgraad</h4>
+                <div id="top-streets"></div>
+            </div>
+            <div class="chart-card">
+                <h4>Sensors per fractie</h4>
+                <canvas id="chart-sensors"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Data wordt elke 4 uur ververst via GitHub Actions · <a href="https://github.com/GraafG/assen-afvalmonitor" style="color:var(--accent)">GitHub</a>
+    </div>
+
+    <script>
+        const TYPE_COLORS = {
+            'Restafval': '#ff6b35',
+            'GFT': '#4caf50',
+            'Papier': '#2196f3',
+            'Glas': '#9c27b0',
+            'PMD': '#ff9800',
+            'Onbekend': '#666',
+        };
+
+        function createGaugeSVG(pct, color) {
+            const angle = (pct / 100) * 180;
+            const rad = (Math.PI / 180);
+            const r = 50;
+            const cx = 60, cy = 60;
+            // Arc from 180° (left) to 0° (right)
+            const startX = cx - r, startY = cy;
+            const endAngle = 180 - angle;
+            const endX = cx + r * Math.cos(endAngle * rad);
+            const endY = cy - r * Math.sin(endAngle * rad);
+            const largeArc = angle > 180 ? 1 : 0;
+
+            return `<svg class="gauge-svg" viewBox="0 0 120 70">
+                <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="var(--gauge-track)" stroke-width="10" stroke-linecap="round"/>
+                <path d="M 10 60 A 50 50 0 ${largeArc} 1 ${endX} ${endY}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round"/>
+            </svg>`;
+        }
+
+        function getGaugeColor(pct) {
+            if (pct > 75) return '#f44336';
+            if (pct > 50) return '#ff9800';
+            if (pct > 25) return '#ffeb3b';
+            return '#4caf50';
+        }
+
+        async function loadStats() {
+            const resp = await fetch('data/containers_fillrates.json');
+            const raw = await resp.json();
+            const containers = raw.map(c => ({
+                number: c.nr,
+                street: c.adres,
+                type: c.fractie,
+                fillLevel: c.vulgraad,
+                heeftSensor: c.heeftSensor,
+                lat: parseFloat(c.lat),
+                lng: parseFloat(c.lng),
+            }));
+
+            renderGauges(containers);
+            renderFacts(containers);
+            renderCharts(containers);
+            renderTopLists(containers);
+        }
+
+        function renderGauges(containers) {
+            const groups = {};
+            containers.forEach(c => {
+                const t = c.type || 'Onbekend';
+                if (!groups[t]) groups[t] = [];
+                if (c.fillLevel != null) groups[t].push(c.fillLevel);
+            });
+
+            // Also add a total gauge
+            const allFills = containers.filter(c => c.fillLevel != null).map(c => c.fillLevel);
+            const totalAvg = allFills.length ? Math.round(allFills.reduce((a,b) => a+b, 0) / allFills.length) : 0;
+
+            let html = `<div class="gauge-card">
+                <h4>Totaal Assen</h4>
+                <div class="gauge-wrapper">${createGaugeSVG(totalAvg, getGaugeColor(totalAvg))}<div class="gauge-value">${totalAvg}%</div></div>
+                <div class="gauge-count">${allFills.length} containers</div>
+            </div>`;
+
+            Object.entries(groups)
+                .sort((a,b) => b[1].length - a[1].length)
+                .forEach(([type, fills]) => {
+                    const avg = Math.round(fills.reduce((a,b) => a+b, 0) / fills.length);
+                    const color = TYPE_COLORS[type] || getGaugeColor(avg);
+                    html += `<div class="gauge-card">
+                        <h4>${type}</h4>
+                        <div class="gauge-wrapper">${createGaugeSVG(avg, color)}<div class="gauge-value">${avg}%</div></div>
+                        <div class="gauge-count">${fills.length} containers</div>
+                    </div>`;
+                });
+
+            document.getElementById('gauges').innerHTML = html;
+        }
+
+        function renderFacts(containers) {
+            const withSensor = containers.filter(c => c.heeftSensor).length;
+            const withFill = containers.filter(c => c.fillLevel != null && c.fillLevel > 0);
+            const full = containers.filter(c => c.fillLevel >= 90).length;
+            const empty = containers.filter(c => c.fillLevel != null && c.fillLevel <= 10).length;
+            const streets = new Set(containers.map(c => c.street).filter(Boolean));
+            const types = new Set(containers.map(c => c.type).filter(Boolean));
+
+            // Busiest street
+            const streetCounts = {};
+            containers.forEach(c => { if (c.street) streetCounts[c.street] = (streetCounts[c.street] || 0) + 1; });
+            const busiestStreet = Object.entries(streetCounts).sort((a,b) => b[1] - a[1])[0];
+
+            // Total "waste pressure" - sum of all fill levels
+            const totalPressure = withFill.reduce((s,c) => s + c.fillLevel, 0);
+
+            const facts = [
+                { emoji: '🏙️', value: containers.length, label: 'Ondergrondse containers', detail: `Verspreid over ${streets.size} straten` },
+                { emoji: '📡', value: withSensor, label: 'Met sensor', detail: `${Math.round(withSensor/containers.length*100)}% dekkingsgraad` },
+                { emoji: '🔴', value: full, label: 'Bijna vol (≥90%)', detail: full > 0 ? 'Legen gewenst!' : 'Alles ziet er goed uit!' },
+                { emoji: '🟢', value: empty, label: 'Bijna leeg (≤10%)', detail: 'Recent geleegd' },
+                { emoji: '🗑️', value: types.size, label: 'Afvalfracties', detail: [...types].join(', ') },
+                { emoji: '📍', value: busiestStreet ? busiestStreet[1] : '-', label: 'Drukste straat', detail: busiestStreet ? busiestStreet[0] : '' },
+                { emoji: '📊', value: Math.round(totalPressure / 1000) + 'k', label: 'Totale vuldruk', detail: 'Som van alle vulgraden' },
+                { emoji: '⚖️', value: withFill.length > 0 ? Math.round(totalPressure / withFill.length) + '%' : '-', label: 'Gem. vulgraad stad', detail: 'Over alle containers met sensor' },
+            ];
+
+            document.getElementById('facts').innerHTML = facts.map(f => `
+                <div class="fact-card">
+                    <div class="emoji">${f.emoji}</div>
+                    <div class="fact-value">${f.value}</div>
+                    <div class="fact-label">${f.label}</div>
+                    <div class="fact-detail">${f.detail}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderCharts(containers) {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const textColor = isDark ? '#71767b' : '#5b6570';
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+            // Distribution histogram
+            const bins = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+            const counts = new Array(10).fill(0);
+            containers.forEach(c => {
+                if (c.fillLevel == null) return;
+                const idx = Math.min(Math.floor(c.fillLevel / 10), 9);
+                counts[idx]++;
+            });
+
+            new Chart(document.getElementById('chart-distribution'), {
+                type: 'bar',
+                data: {
+                    labels: bins.slice(0, -1).map((b, i) => `${b}-${bins[i+1]}%`),
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: counts.map((_, i) => {
+                            const mid = i * 10 + 5;
+                            if (mid > 75) return '#f4433688';
+                            if (mid > 50) return '#ff980088';
+                            if (mid > 25) return '#ffeb3b88';
+                            return '#4caf5088';
+                        }),
+                        borderColor: counts.map((_, i) => {
+                            const mid = i * 10 + 5;
+                            if (mid > 75) return '#f44336';
+                            if (mid > 50) return '#ff9800';
+                            if (mid > 25) return '#ffeb3b';
+                            return '#4caf50';
+                        }),
+                        borderWidth: 1,
+                    }]
+                },
+                options: {
+                    responsive: true, plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        y: { ticks: { color: textColor }, grid: { color: gridColor } },
+                    }
+                }
+            });
+
+            // Fracties donut
+            const typeCounts = {};
+            containers.forEach(c => { const t = c.type || 'Onbekend'; typeCounts[t] = (typeCounts[t] || 0) + 1; });
+            const sortedTypes = Object.entries(typeCounts).sort((a,b) => b[1] - a[1]);
+
+            new Chart(document.getElementById('chart-fracties'), {
+                type: 'doughnut',
+                data: {
+                    labels: sortedTypes.map(([t]) => t),
+                    datasets: [{
+                        data: sortedTypes.map(([,c]) => c),
+                        backgroundColor: sortedTypes.map(([t]) => TYPE_COLORS[t] || '#666'),
+                        borderColor: 'var(--bg-card)',
+                        borderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 12 } } },
+                }
+            });
+
+            // Sensor coverage per fractie
+            const sensorData = {};
+            containers.forEach(c => {
+                const t = c.type || 'Onbekend';
+                if (!sensorData[t]) sensorData[t] = { total: 0, sensor: 0 };
+                sensorData[t].total++;
+                if (c.heeftSensor) sensorData[t].sensor++;
+            });
+            const sTypes = Object.keys(sensorData).sort((a,b) => sensorData[b].total - sensorData[a].total);
+
+            new Chart(document.getElementById('chart-sensors'), {
+                type: 'bar',
+                data: {
+                    labels: sTypes,
+                    datasets: [
+                        { label: 'Met sensor', data: sTypes.map(t => sensorData[t].sensor), backgroundColor: '#4caf5088', borderColor: '#4caf50', borderWidth: 1 },
+                        { label: 'Zonder sensor', data: sTypes.map(t => sensorData[t].total - sensorData[t].sensor), backgroundColor: '#f4433688', borderColor: '#f44336', borderWidth: 1 },
+                    ]
+                },
+                options: {
+                    responsive: true, indexAxis: 'y',
+                    plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 12 } } },
+                    scales: {
+                        x: { stacked: true, ticks: { color: textColor }, grid: { color: gridColor } },
+                        y: { stacked: true, ticks: { color: textColor }, grid: { display: false } },
+                    }
+                }
+            });
+        }
+
+        function renderTopLists(containers) {
+            const withFill = containers.filter(c => c.fillLevel != null).sort((a,b) => b.fillLevel - a.fillLevel);
+
+            // Top 10 fullest
+            const topFull = withFill.slice(0, 10);
+            document.getElementById('top-full').innerHTML = topFull.map((c, i) => {
+                const barColor = c.fillLevel > 80 ? '#f44336' : c.fillLevel > 50 ? '#ff9800' : '#4caf50';
+                return `<div class="top-item">
+                    <span class="top-rank">${i+1}</span>
+                    <div class="top-info"><div class="name">#${c.number}</div><div class="detail">${c.street || '-'} · ${c.type}</div></div>
+                    <div class="top-bar"><div class="top-bar-inner" style="width:${c.fillLevel}%;background:${barColor}"></div></div>
+                    <strong>${c.fillLevel}%</strong>
+                </div>`;
+            }).join('');
+
+            // Top 10 emptiest
+            const topEmpty = withFill.filter(c => c.fillLevel >= 0).sort((a,b) => a.fillLevel - b.fillLevel).slice(0, 10);
+            document.getElementById('top-empty').innerHTML = topEmpty.map((c, i) => {
+                return `<div class="top-item">
+                    <span class="top-rank">${i+1}</span>
+                    <div class="top-info"><div class="name">#${c.number}</div><div class="detail">${c.street || '-'} · ${c.type}</div></div>
+                    <div class="top-bar"><div class="top-bar-inner" style="width:${Math.max(c.fillLevel, 3)}%;background:#4caf50"></div></div>
+                    <strong>${c.fillLevel}%</strong>
+                </div>`;
+            }).join('');
+
+            // Top streets by average fill
+            const streetFills = {};
+            containers.forEach(c => {
+                if (!c.street || c.fillLevel == null) return;
+                if (!streetFills[c.street]) streetFills[c.street] = [];
+                streetFills[c.street].push(c.fillLevel);
+            });
+            const topStreets = Object.entries(streetFills)
+                .filter(([, fills]) => fills.length >= 2) // at least 2 containers
+                .map(([street, fills]) => ({ street, avg: Math.round(fills.reduce((a,b) => a+b, 0) / fills.length), count: fills.length }))
+                .sort((a,b) => b.avg - a.avg)
+                .slice(0, 10);
+
+            document.getElementById('top-streets').innerHTML = topStreets.map((s, i) => {
+                const barColor = s.avg > 75 ? '#f44336' : s.avg > 50 ? '#ff9800' : '#4caf50';
+                return `<div class="top-item">
+                    <span class="top-rank">${i+1}</span>
+                    <div class="top-info"><div class="name">${s.street}</div><div class="detail">${s.count} containers</div></div>
+                    <div class="top-bar"><div class="top-bar-inner" style="width:${s.avg}%;background:${barColor}"></div></div>
+                    <strong>${s.avg}%</strong>
+                </div>`;
+            }).join('');
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>
