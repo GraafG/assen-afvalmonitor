@@ -231,6 +231,8 @@ def main():
         if not hist["samples"]:
             samples = [l for l in locaties if l["heeftSensor"] and l["vulgraad"] > 0][:8]
             hist["samples"] = [{"nr": s["nr"], "adres": s["adres"], "fractie": s["fractie"]} for s in samples]
+        # Store fractie map for all containers (enables per-fractie timeline)
+        hist["fractie_map"] = {l["nr"]: l["fractie"] for l in locaties if l["nr"] and l["fractie"]}
         with open(history_file, "w") as f:
             json.dump(hist, f, separators=(",", ":"), ensure_ascii=False)
 
