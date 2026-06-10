@@ -218,15 +218,18 @@ def main():
         with open(state_file, "w") as f:
             json.dump(current_state, f, separators=(",", ":"))
 
-        # Update rolling history (append snapshot, keep last 30 days = 180 points at 4h)
+        # Update rolling history (append snapshot, keep last 30 days = 1 per day)
         snapshot = {"ts": now_ams.isoformat(), "containers": current_state}
         hist = {"samples": [], "history": []}
         if history_file.exists():
             with open(history_file) as f:
                 hist = json.load(f)
+        # Replace today's entry if it already exists, otherwise append
+        today = now_ams.strftime("%Y-%m-%d")
+        hist["history"] = [h for h in hist["history"] if not h["ts"].startswith(today)]
         hist["history"].append(snapshot)
-        # Keep max 180 snapshots (30 days at 4h intervals)
-        hist["history"] = hist["history"][-180:]
+        # Keep max 30 snapshots (30 days)
+        hist["history"] = hist["history"][-30:]
         # Update samples (first 8 containers with sensor + data)
         if not hist["samples"]:
             samples = [l for l in locaties if l["heeftSensor"] and l["vulgraad"] > 0][:8]
