@@ -2,7 +2,7 @@ name: Update Data & Deploy
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # Every 4 hours
+    - cron: '0 3 * * *'  # Daily at 05:00 Amsterdam (03:00 UTC)
   workflow_dispatch:
   push:
     branches: [main]
