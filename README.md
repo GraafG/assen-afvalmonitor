@@ -34,6 +34,11 @@ The Mendix XAS protocol requires client-side hash computation, so direct API cal
 | Container locations + sensor status | ✅ Working | Playwright + Mendix XAS |
 | Collection schedule (GFT, PAPIER, PMD) | ✅ Working | HTTP API |
 | Address lookup | ✅ Working | HTTP API |
+| Public holidays + weekends | ✅ Working | Static `data/holidays.json` |
+
+The stats timeline shades **weekends** (Saturday/Sunday, no working days) and **Dutch public holidays** (officiële feestdagen voor het Rijk / ambtenaren) as background bands. Holidays for 2026–2027 live in `data/holidays.json`; weekends are detected client-side. Extend the JSON with future years as needed.
+
+The stats page also shows **emptied containers per weekday**. A container counts as *emptied* when its fill rate drops **≥ 30 percentage points** between two consecutive readings **and** ends **≤ 20%** (filters sensor noise / partial settling). Sensors report a collection roughly **one day after** it actually happens, so the weekday attribution is shifted back by `EMPTIED_REPORT_LAG_DAYS` (default 1) to land on the real collection day. This weekday breakdown plus the holiday/weekend shading are the foundation for future fill-rate prediction, where holidays and non-working days are expected to be a key factor.
 
 ## Container Data Fields
 
