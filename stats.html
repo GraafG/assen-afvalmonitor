@@ -140,6 +140,13 @@
             <p style="font-size:0.7rem; color:var(--text-secondary); margin-top:0.75rem; text-align:center;" id="timeline-info"></p>
         </div>
 
+        <div class="section-title">🗓️ Legingen per weekdag</div>
+        <div class="chart-card" style="margin-bottom:3rem;">
+            <h4>Gedetecteerde legingen per dag van de week</h4>
+            <canvas id="chart-emptied-weekday" style="max-height:300px;"></canvas>
+            <p style="font-size:0.7rem; color:var(--text-secondary); margin-top:0.75rem; text-align:center;" id="emptied-info"></p>
+        </div>
+
         <div class="section-title">🎯 Gemiddelde vulgraad per fractie</div>
         <div class="gauges-grid" id="gauges"></div>
 
@@ -242,13 +249,21 @@
             renderCharts(containers);
             renderTopLists(containers);
 
+            // Load Dutch public holidays (rijksoverheid) for timeline shading
+            let holidays = { holidays: [] };
+            try {
+                const holResp = await fetch('data/holidays.json');
+                if (holResp.ok) holidays = await holResp.json();
+            } catch { /* shading falls back to weekends only */ }
+
             // Load history for timeline
             try {
                 const histResp = await fetch('data/history.json');
                 if (histResp.ok) {
                     const histData = await histResp.json();
                     if (histData.history && histData.history.length > 0) {
-                        renderTimeline(histData);
+                        renderTimeline(histData, holidays);
+                        renderEmptiedPerWeekday(histData);
                     } else {
                         document.getElementById('timeline-info').textContent = 'Nog geen historische data beschikbaar. Data wordt elke 4 uur verzameld.';
                     }
@@ -258,15 +273,55 @@
             }
         }
 
-        function renderTimeline(histData) {
+        function renderTimeline(histData, holidayData) {
             const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const textColor = isDark ? '#71767b' : '#5b6570';
             const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+            const weekendColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
+            const holidayColor = isDark ? 'rgba(255,152,0,0.16)' : 'rgba(255,152,0,0.18)';
 
             const history = histData.history;
             const span = Math.round((new Date(history[history.length-1].ts) - new Date(history[0].ts)) / 86400000);
             document.getElementById('timeline-title').textContent = `Vulgraad verloop (${span > 0 ? span + ' dagen' : 'vandaag'})`;
-            document.getElementById('timeline-info').textContent = `${history.length} metingen · wordt elke 4 uur aangevuld`;
+
+            // Weekend (geen werkdag) + feestdag markering per meetpunt
+            const dayKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            const holidayNames = {};
+            (holidayData?.holidays || []).forEach(h => { holidayNames[h.date] = h.name; });
+            const dates = history.map(h => new Date(h.ts));
+            const marks = dates.map(d => {
+                const key = dayKey(d);
+                if (holidayNames[key]) return { kind: 'holiday', label: holidayNames[key] };
+                const day = d.getDay();
+                if (day === 0 || day === 6) return { kind: 'weekend', label: 'Weekend' };
+                return null;
+            });
+            const hasHolidayMark = marks.some(m => m && m.kind === 'holiday');
+            const hasWeekendMark = marks.some(m => m && m.kind === 'weekend');
+            const legendParts = [`${history.length} metingen · wordt elke 4 uur aangevuld`];
+            if (hasWeekendMark) legendParts.push('grijs = weekend');
+            if (hasHolidayMark) legendParts.push('oranje = feestdag');
+            document.getElementById('timeline-info').textContent = legendParts.join(' · ');
+
+            // Chart.js plugin: teken weekend-/feestdagbanden achter de lijnen
+            const shadePlugin = {
+                id: 'weekendHolidayShade',
+                beforeDatasetsDraw(chart) {
+                    const xScale = chart.scales.x;
+                    if (!xScale) return;
+                    const { ctx, chartArea: { top, bottom } } = chart;
+                    ctx.save();
+                    for (let i = 0; i < marks.length; i++) {
+                        if (!marks[i]) continue;
+                        const center = xScale.getPixelForValue(i);
+                        const prev = i === 0 ? center : (xScale.getPixelForValue(i-1) + center) / 2;
+                        const next = i === marks.length-1 ? center : (center + xScale.getPixelForValue(i+1)) / 2;
+                        ctx.fillStyle = marks[i].kind === 'holiday' ? holidayColor : weekendColor;
+                        ctx.fillRect(prev, top, Math.max(next - prev, 1), bottom - top);
+                    }
+                    ctx.restore();
+                }
+            };
 
             const labels = history.map(h => {
                 const d = new Date(h.ts);
@@ -337,17 +392,103 @@
             new Chart(document.getElementById('chart-timeline'), {
                 type: 'line',
                 data: { labels, datasets },
+                plugins: [shadePlugin],
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: { position: 'bottom', labels: { color: textColor, boxWidth: 12, font: { size: 11 } } },
-                        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } },
+                        tooltip: { callbacks: {
+                            title: items => {
+                                const m = marks[items[0].dataIndex];
+                                return m ? `${labels[items[0].dataIndex]} · ${m.label}` : labels[items[0].dataIndex];
+                            },
+                            label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '%'
+                        } },
                     },
                     scales: {
                         x: { ticks: { color: textColor, maxTicksLimit: 10, font: { size: 9 } }, grid: { color: gridColor } },
                         y: { min: 0, max: 100, ticks: { color: textColor, callback: v => v + '%' }, grid: { color: gridColor } },
+                    }
+                }
+            });
+        }
+
+        // Drempels voor "geleegd": grote daling én daarna laag (filtert sensorruis)
+        const EMPTIED_DROP = 30;       // minimale daling in procentpunten
+        const EMPTIED_MAX_AFTER = 20;  // maximale vulgraad na leging
+        // Sensoren rapporteren een leging ~1 dag na de daadwerkelijke ophaaldag.
+        // Corrigeer de weekdag-toewijzing zodat de leging op de echte ophaaldag valt.
+        const EMPTIED_REPORT_LAG_DAYS = 1;
+
+        function renderEmptiedPerWeekday(histData) {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const textColor = isDark ? '#71767b' : '#5b6570';
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+            const history = histData.history;
+            const dayLabels = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
+            const counts = new Array(7).fill(0);
+            const daysSeen = Array.from({ length: 7 }, () => new Set());
+
+            const dayKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            const toIdx = d => (d.getDay() + 6) % 7; // ma=0 ... zo=6
+            // Detectiemoment terugschuiven naar de werkelijke ophaaldag
+            const collectionDate = ts => {
+                const d = new Date(ts);
+                d.setDate(d.getDate() - EMPTIED_REPORT_LAG_DAYS);
+                return d;
+            };
+
+            // Tel legingen tussen opeenvolgende metingen, toegewezen aan de ophaaldag
+            for (let i = 1; i < history.length; i++) {
+                const prev = history[i-1].containers;
+                const curr = history[i].containers;
+                const d = collectionDate(history[i].ts);
+                const idx = toIdx(d);
+                daysSeen[idx].add(dayKey(d));
+                for (const nr of Object.keys(curr)) {
+                    const p = prev[nr];
+                    if (p === undefined) continue;
+                    const after = curr[nr];
+                    if ((p - after) >= EMPTIED_DROP && after <= EMPTIED_MAX_AFTER) counts[idx]++;
+                }
+            }
+
+            const total = counts.reduce((a,b) => a+b, 0);
+            const note = `drempel: daling ≥${EMPTIED_DROP}pp én daarna ≤${EMPTIED_MAX_AFTER}% · gecorrigeerd voor ${EMPTIED_REPORT_LAG_DAYS} dag rapportagevertraging`;
+            document.getElementById('emptied-info').textContent = total > 0
+                ? `${total} legingen gedetecteerd · ${note}`
+                : `Nog geen legingen gedetecteerd · ${note}`;
+
+            new Chart(document.getElementById('chart-emptied-weekday'), {
+                type: 'bar',
+                data: {
+                    labels: dayLabels,
+                    datasets: [{
+                        label: 'Legingen',
+                        data: counts,
+                        backgroundColor: counts.map((_, i) => i >= 5 ? '#9e9e9e' : '#4caf50'),
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: {
+                            label: ctx => {
+                                const n = daysSeen[ctx.dataIndex].size || 1;
+                                const avg = (ctx.parsed.y / n).toFixed(1);
+                                return `${ctx.parsed.y} legingen · gem. ${avg}/dag (${n} dag${n === 1 ? '' : 'en'})`;
+                            }
+                        } },
+                    },
+                    scales: {
+                        x: { ticks: { color: textColor, font: { size: 10 } }, grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { color: textColor, precision: 0 }, grid: { color: gridColor } },
                     }
                 }
             });
