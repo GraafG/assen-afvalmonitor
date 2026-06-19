@@ -3019,3 +3019,301 @@
 {"ts":"2026-06-18T06:32:05.078695+02:00","nr":"236","adres":"Brink  236","fractie":"Restafval","from":68,"to":2}
 {"ts":"2026-06-18T06:32:05.078695+02:00","nr":"299","adres":"Bremstraat  299","fractie":"Restafval","from":37,"to":38}
 {"ts":"2026-06-18T06:32:05.078695+02:00","nr":"119","adres":"Bremstraat  119","fractie":"Restafval","from":48,"to":54}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"322PAP","adres":"Beuzeveen 322","fractie":"Papier","from":18,"to":22}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"333PAP","adres":"Brunelstraat","fractie":"Papier","from":64,"to":23}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"338PAP","adres":"Beilerstraat","fractie":"Papier","from":46,"to":55}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"334PAP","adres":"Bernardstraat","fractie":"Papier","from":32,"to":33}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"294PAP","adres":"Gildestraat  294","fractie":"Papier","from":14,"to":56}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"146PAP","adres":"Oldengaardestraat 146","fractie":"Papier","from":9,"to":12}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"147PAP","adres":"Oosterbroekstraat  147","fractie":"Papier","from":12,"to":14}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"151PAP","adres":"C van der Lindenstr  151 ","fractie":"Papier","from":48,"to":0}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"242PAP","adres":"Ceresplein \"Triade\"242","fractie":"Papier","from":16,"to":20}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"212PAP","adres":"Mercuriusplein 212","fractie":"Papier","from":12,"to":18}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"307PAP","adres":"Jan Fabriciusstraat  307","fractie":"Papier","from":70,"to":30}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"313PAP","adres":"Van Heuveng \"Wijde Blik\"  193","fractie":"Papier","from":20,"to":46}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"295PAP","adres":"Traverse  295","fractie":"Papier","from":26,"to":35}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"168PAP","adres":"Nansenstraat 33D, 9402AJ Assen","fractie":"Papier","from":14,"to":0}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"235PAP","adres":"Het Kanaal  230","fractie":"Papier","from":38,"to":33}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"320PAP","adres":"Groningerstraat 320","fractie":"Papier","from":19,"to":26}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"319PAP","adres":"Groningerstraat  Jongman 319","fractie":"Papier","from":16,"to":24}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"142PAP","adres":"Smetanalaan 142 ","fractie":"Papier","from":0,"to":4}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"293PAP","adres":"Schoolstraat  293","fractie":"Papier","from":27,"to":31}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"325PAP","adres":"Hoekbree 325","fractie":"Papier","from":17,"to":21}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"327","adres":"Torenlaan MCB","fractie":"Restafval","from":28,"to":40}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"244","adres":"Tjalk  244","fractie":"Restafval","from":3,"to":4}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"155","adres":"Thorbeckelaan  155","fractie":"Restafval","from":5,"to":7}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"154","adres":"Thorbeckelaan  154","fractie":"Restafval","from":57,"to":65}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"191","adres":"Zwin  191","fractie":"Restafval","from":29,"to":49}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"237","adres":"Zwartwatersweg   237","fractie":"Restafval","from":16,"to":21}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"315","adres":"Zuringes 315","fractie":"Restafval","from":39,"to":40}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"207","adres":"Zuidhaege  207","fractie":"Restafval","from":10,"to":11}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"100","adres":"Nabij Steigermesschen  0, 9403ZS Assen","fractie":"Restafval","from":11,"to":13}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"141","adres":"Steendijk  141","fractie":"Restafval","from":13,"to":32}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"261","adres":"Stedewaarts  261","fractie":"Restafval","from":52,"to":54}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"311","adres":"Stadhouderslaan 311","fractie":"Restafval","from":38,"to":42}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"153","adres":"Thorbeckelaan  153","fractie":"Restafval","from":68,"to":9}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"280","adres":"Thorbeckelaan   280","fractie":"Restafval","from":36,"to":50}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"190R","adres":"Stroom 190","fractie":"Restafval","from":38,"to":48}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"257","adres":"Stoepveldsingel  257","fractie":"Restafval","from":26,"to":27}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"348","adres":"Zuidhaege 11, 9401NZ Assen","fractie":"Restafval","from":26,"to":41}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"103BIO","adres":"Kleuvenstee 103","fractie":"Groente, Fruit en Tuinafval","from":3,"to":5}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"238","adres":"Molenstraat   238","fractie":"Restafval","from":57,"to":2}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"317","adres":"Middenweg 317","fractie":"Restafval","from":65,"to":70}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"316","adres":"Middenweg 316","fractie":"Restafval","from":51,"to":72}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"298","adres":"Middenweg  298","fractie":"Restafval","from":56,"to":57}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"162","adres":"Mr. P.J. Troelstralaan 38, 9402BJ Assen","fractie":"Restafval","from":63,"to":73}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"172","adres":"MR GR. v Prinsterln  172","fractie":"Restafval","from":72,"to":20}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"218","adres":"Mooi Zeegse 218","fractie":"Restafval","from":86,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"149","adres":"Molenstraat  149","fractie":"Restafval","from":30,"to":32}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"243","adres":"Markt  243","fractie":"Restafval","from":26,"to":6}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"182","adres":"Maria in Campislaan  182","fractie":"Restafval","from":50,"to":53}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"181","adres":"Maria in Campislaan  181","fractie":"Restafval","from":11,"to":19}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"297","adres":"Middenweg  297","fractie":"Restafval","from":97,"to":24}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"212","adres":"Mercuriusplein 212","fractie":"Restafval","from":46,"to":59}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"239","adres":"Mensingestraat   239","fractie":"Restafval","from":70,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"300","adres":"Marktstraat  300","fractie":"Restafval","from":22,"to":28}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"285","adres":"Vaart ZZ  285","fractie":"Restafval","from":31,"to":33}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"274","adres":"Vaart N.Z.  274","fractie":"Restafval","from":46,"to":51}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"210","adres":"Vaart NZ  210","fractie":"Restafval","from":14,"to":16}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"250","adres":"Tuinstraat 250","fractie":"Restafval","from":3,"to":8}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"318","adres":"Ulohof 318","fractie":"Restafval","from":48,"to":60}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"335","adres":"Nicolaas Beetslaan","fractie":"Restafval","from":2,"to":6}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"295","adres":"Traverse  295","fractie":"Restafval","from":36,"to":61}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"173","adres":"Oostermoer  173","fractie":"Restafval","from":32,"to":37}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"174","adres":"Oostermoer  174","fractie":"Restafval","from":11,"to":22}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"264","adres":"Verdistraat   264","fractie":"Restafval","from":51,"to":53}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"201","adres":"Vogelkerslaan  201","fractie":"Restafval","from":37,"to":38}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"193","adres":"Van Heuveng \"Wijde Blik\"  193","fractie":"Restafval","from":24,"to":31}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"336","adres":"Veemarktstraat","fractie":"Restafval","from":64,"to":11}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"179","adres":"Van der Scheerstraat  179","fractie":"Restafval","from":26,"to":39}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"314","adres":"Van Heuven Goedhartlaan 314","fractie":"Restafval","from":16,"to":25}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"196","adres":"Nobellaan 43, 9406AA Assen","fractie":"Restafval","from":53,"to":64}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"167","adres":"MR P J Troelstralaan  167","fractie":"Restafval","from":32,"to":35}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"164","adres":"MR P J Troelstralaan  164","fractie":"Restafval","from":50,"to":52}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"168","adres":"Nansenstraat 33D, 9402AJ Assen","fractie":"Restafval","from":36,"to":50}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"282","adres":"Mr. P.J. Troelstralaan 144, 9402BM Assen","fractie":"Restafval","from":49,"to":53}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"163A","adres":"Mr P J Troelstraln 163 A","fractie":"Restafval","from":65,"to":69}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"199","adres":"Mr. P.J. Troelstralaan 199, 9402BG Assen","fractie":"Restafval","from":8,"to":23}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"143","adres":"Smetanalaan 143 ","fractie":"Restafval","from":36,"to":50}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"142","adres":"Smetanalaan 142 ","fractie":"Restafval","from":10,"to":40}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"200","adres":"Sluisstraat  200","fractie":"Restafval","from":33,"to":50}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"323","adres":"Slingeborgh 323","fractie":"Restafval","from":44,"to":50}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"144","adres":"Smetanalaan 144 ","fractie":"Restafval","from":44,"to":82}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"219","adres":"Korenmolen  219","fractie":"Restafval","from":20,"to":36}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"140","adres":"Koekoekstraat  140","fractie":"Restafval","from":44,"to":52}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"228","adres":"Kloekhorststraat  228","fractie":"Restafval","from":50,"to":66}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"103","adres":"Kleuvenstee 103","fractie":"Restafval","from":29,"to":31}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"180","adres":"Maria in Campislaan  180","fractie":"Restafval","from":23,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"131","adres":"Lod. Napoleonplein  131","fractie":"Restafval","from":68,"to":81}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"249","adres":"Martin Luther Kingweg 68, 9403PW Assen","fractie":"Restafval","from":44,"to":49}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"251","adres":"Lindelaan 251","fractie":"Restafval","from":48,"to":55}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"301","adres":"Kruisstraat  301","fractie":"Restafval","from":52,"to":20}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"215","adres":"Kanaalstraat  215","fractie":"Restafval","from":34,"to":50}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"232A","adres":"Javastraat 232 A ","fractie":"Restafval","from":28,"to":31}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"232","adres":"Javastraat  232","fractie":"Restafval","from":41,"to":45}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"307","adres":"Jan Fabriciusstraat  307","fractie":"Restafval","from":30,"to":60}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"247","adres":"Kleuvenstee \" Zuid \" 247","fractie":"Restafval","from":53,"to":61}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"248","adres":"Kleuvenstee \" Noord \" 248","fractie":"Restafval","from":0,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"148","adres":"Klenckestraat  148","fractie":"Restafval","from":15,"to":32}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"216","adres":"Kanaalstraat  216","fractie":"Restafval","from":24,"to":36}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"290","adres":"Witterhoofdweg  290","fractie":"Restafval","from":17,"to":43}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"302","adres":"Weiersloop  302","fractie":"Restafval","from":12,"to":28}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"106","adres":"Walakker 106","fractie":"Restafval","from":58,"to":72}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"324","adres":"W.A. Scholtenstraat 324","fractie":"Restafval","from":20,"to":29}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"99","adres":"Wisselbak 99","fractie":"Restafval","from":21,"to":28}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"105","adres":"Winkelakker 105","fractie":"Restafval","from":1,"to":4}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"213","adres":"Weiersstraat  213","fractie":"Restafval","from":30,"to":38}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"211","adres":"Weiersstraat   211","fractie":"Restafval","from":42,"to":46}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"114","adres":"Speenkruidstraat 353, 9404HP Assen","fractie":"Restafval","from":45,"to":54}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"113","adres":"Speenkruidstraat 46,  Assen","fractie":"Restafval","from":6,"to":24}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"304","adres":"Smetanalaan 304","fractie":"Restafval","from":77,"to":5}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"350","adres":"Prins Hendrikstraat","fractie":"Restafval","from":5,"to":15}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"178","adres":"Stadhouderslaan  178","fractie":"Restafval","from":46,"to":58}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"177","adres":"Stadhouderslaan  177","fractie":"Restafval","from":5,"to":21}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"329","adres":"Sperwerstraat 329","fractie":"Restafval","from":71,"to":3}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"135","adres":"Sperwerstraat  135","fractie":"Restafval","from":67,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"118","adres":"Zilverschoonstraat 118","fractie":"Restafval","from":70,"to":88}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"349","adres":"Nansenstraat 0, 9402AJ Assen","fractie":"Restafval","from":35,"to":0}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"342","adres":"Groen van Prinsterenlaan 30,  Assen","fractie":"Restafval","from":16,"to":20}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"341","adres":"Beek","fractie":"Restafval","from":36,"to":52}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"296","adres":"Zuidergracht  296","fractie":"Restafval","from":69,"to":23}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"258","adres":"Perzikstraat  258","fractie":"Restafval","from":55,"to":60}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"253","adres":"Pelikaanstraat 253","fractie":"Restafval","from":68,"to":71}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"202","adres":"Parkplein  202","fractie":"Restafval","from":69,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"265","adres":"Paganinilaan  265","fractie":"Restafval","from":67,"to":70}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"260","adres":"Prins Claus Plantsoen  260","fractie":"Restafval","from":2,"to":5}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"279","adres":"Platolaan   279","fractie":"Restafval","from":23,"to":27}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"110","adres":"Planetenlaan  110","fractie":"Restafval","from":2,"to":4}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"259","adres":"Perzikstraat 72, 9408BS Assen","fractie":"Restafval","from":23,"to":24}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"234","adres":"Oranjestraat 234","fractie":"Restafval","from":29,"to":35}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"139","adres":"Oosterpark  139","fractie":"Restafval","from":17,"to":32}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"233","adres":"Oranjestraat 233","fractie":"Restafval","from":27,"to":33}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"136","adres":"Oosterpark  136","fractie":"Restafval","from":60,"to":64}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"137","adres":"Oosterpark  137","fractie":"Restafval","from":23,"to":41}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"173A","adres":"Oostermoer 173 A","fractie":"Restafval","from":59,"to":61}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"132","adres":"Oosterparallelweg  132","fractie":"Restafval","from":27,"to":31}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"255","adres":"Overstoep  255","fractie":"Restafval","from":21,"to":22}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"254","adres":"Overcingellaan   254","fractie":"Restafval","from":32,"to":44}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"222","adres":"Oude molenstraat  222","fractie":"Restafval","from":58,"to":71}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"234A","adres":"Oranjestraat 234 A","fractie":"Restafval","from":13,"to":17}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"268","adres":"Vondellaan  268","fractie":"Restafval","from":6,"to":16}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"267","adres":"Vondellaan  267","fractie":"Restafval","from":4,"to":14}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"266","adres":"Vondellaan  266","fractie":"Restafval","from":11,"to":18}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"321","adres":"Vredeveldseweg 321","fractie":"Restafval","from":55,"to":56}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"291","adres":"Vredeveldseweg  291","fractie":"Restafval","from":50,"to":56}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"125","adres":"Vredeveldseweg  125","fractie":"Restafval","from":65,"to":69}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"252","adres":"Resedastraat 252","fractie":"Restafval","from":54,"to":58}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"330","adres":"Rembrandtlaan 330","fractie":"Restafval","from":60,"to":70}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"175","adres":"Rabenhauptstraat  175","fractie":"Restafval","from":47,"to":62}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"204","adres":"Prinses Beatrixstraat","fractie":"Restafval","from":30,"to":33}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"346","adres":"Mien Ruysweg 36, 9408KB Assen","fractie":"Restafval","from":53,"to":75}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"340","adres":"Molenstraat 340","fractie":"Restafval","from":62,"to":67}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"112","adres":"Speenkruidstraat 161, 9404HG Assen","fractie":"Restafval","from":53,"to":71}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"262","adres":"Rijnstraat   262","fractie":"Restafval","from":1,"to":5}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"742PMD","adres":"Smetanalaan 142 ","fractie":"PMD","from":23,"to":24}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"703PMD","adres":"Mercuriusplein 212","fractie":"PMD","from":0,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"706PMD","adres":"Jan Fabriciusstraat  306","fractie":"PMD","from":0,"to":2}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"743PMD","adres":"Smetanalaan 143 ","fractie":"PMD","from":24,"to":26}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"733PMD","adres":"Brunelstraat","fractie":"PMD","from":0,"to":6}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"734PMD","adres":"Bernardstraat","fractie":"PMD","from":41,"to":45}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"705PMD","adres":"Nijlandstraat 305","fractie":"PMD","from":3,"to":11}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"735PMD","adres":"Nicolaas Beetslaan","fractie":"PMD","from":29,"to":32}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"751PMD","adres":"C van der Lindenstr  151 ","fractie":"PMD","from":2,"to":5}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"748PMD","adres":"Klenckestraat  148","fractie":"PMD","from":3,"to":8}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"791PMD","adres":"Zwin  191","fractie":"PMD","from":93,"to":100}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"798PMD","adres":"Middenweg  298","fractie":"PMD","from":39,"to":40}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"708PMD","adres":"Anemoonstraat  129","fractie":"PMD","from":2,"to":6}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"157","adres":"A F D Sav. Lohmanstr  157","fractie":"Restafval","from":29,"to":40}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"245","adres":"Aardbeihof 1, 9408BK Assen","fractie":"Restafval","from":50,"to":54}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"746PMD","adres":"Mien Ruysweg 36, 9408KB Assen","fractie":"PMD","from":4,"to":5}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"747PMD","adres":"Mien Ruysweg 36, 9408KB Assen","fractie":"PMD","from":56,"to":58}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"793PMD","adres":"Van Heuveng \"Wijde Blik\"  193","fractie":"PMD","from":42,"to":49}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"707PMD","adres":"Nansenstraat 33D, 9402AJ Assen","fractie":"PMD","from":5,"to":8}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"709PMD","adres":"Beunheugte 62, 9403HW Assen","fractie":"PMD","from":67,"to":69}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"730PMD","adres":"Rembrandtlaan","fractie":"PMD","from":61,"to":66}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"722PMD","adres":"Oude molenstraat  222","fractie":"PMD","from":25,"to":26}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"323PAP","adres":"Slingeborgh 323","fractie":"Papier en karton","from":57,"to":60}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"341PAP","adres":"Beek","fractie":"Papier en karton","from":18,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"148PAP","adres":"Klenckestraat  148","fractie":"Papier en karton","from":2,"to":9}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"267PAP","adres":"Vondellaan  267","fractie":"Papier en karton","from":13,"to":11}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"266PAP","adres":"Vondellaan  266","fractie":"Papier en karton","from":51,"to":54}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"347PAP","adres":"Mien Ruysweg 36, 9408KB Assen","fractie":"Papier en karton","from":14,"to":16}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"139PAP","adres":"Oosterpark  139","fractie":"Papier en karton","from":12,"to":13}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"136PAP","adres":"Oosterpark  136","fractie":"Papier en karton","from":16,"to":29}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"336PAP","adres":"Veemarktstraat","fractie":"Papier en karton","from":77,"to":78}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"330PAP","adres":"Rembrandtlaan 330","fractie":"Papier en karton","from":55,"to":63}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"112PAP","adres":"Speenkruidstraat 161, 9404HG Assen","fractie":"Papier en karton","from":22,"to":11}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"113PAP","adres":"Speenkruidstraat 46,  Assen","fractie":"Papier en karton","from":13,"to":4}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"350PAP","adres":"Prins Hendrikstraat","fractie":"Papier en karton","from":4,"to":26}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"315PAP","adres":"Zuringes 315","fractie":"Papier en karton","from":69,"to":65}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"191PAP","adres":"Zwin  191","fractie":"Papier en karton","from":44,"to":12}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"177PAP","adres":"Stadhouderslaan  177","fractie":"Papier en karton","from":43,"to":39}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"114PAP","adres":"Speenkruidstraat 353, 9404HP Assen","fractie":"Papier en karton","from":37,"to":2}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"329PAP","adres":"Sperwerstraat 329","fractie":"Papier en karton","from":36,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"106PAP","adres":"Walakker 106","fractie":"Papier en karton","from":17,"to":24}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"291PAP","adres":"Vredeveldseweg  291","fractie":"Papier en karton","from":71,"to":11}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"268PAP","adres":"Vondellaan  268","fractie":"Papier en karton","from":19,"to":21}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"154PAP","adres":"Thorbeckelaan  154","fractie":"Papier en karton","from":22,"to":23}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"290PAP","adres":"Witterhoofdweg  290","fractie":"Papier en karton","from":19,"to":43}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"213PAP","adres":"Weiersstraat  213","fractie":"Papier en karton","from":27,"to":31}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"276","adres":"Het  Kanaal  276","fractie":"Restafval","from":9,"to":26}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"271","adres":"Herman Broodstraat  271","fractie":"Restafval","from":13,"to":21}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"337","adres":"Hendrik van Boeijenlaan","fractie":"Restafval","from":31,"to":36}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"320","adres":"Groningerstraat 320","fractie":"Restafval","from":38,"to":50}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"272","adres":"Het Palet  272","fractie":"Restafval","from":62,"to":64}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"275","adres":"Het Kanaal / van Houtenstraat 275","fractie":"Restafval","from":6,"to":16}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"230","adres":"Het Kanaal  230","fractie":"Restafval","from":45,"to":54}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"221","adres":"Het Kanaal  221","fractie":"Restafval","from":20,"to":28}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"184","adres":"Gouwe  184","fractie":"Restafval","from":41,"to":45}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"183","adres":"Gouwe  183","fractie":"Restafval","from":53,"to":69}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"294","adres":"Gildestraat  294","fractie":"Restafval","from":15,"to":29}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"134","adres":"Gerard Doustraat 134","fractie":"Restafval","from":20,"to":27}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"319","adres":"Groningerstraat  Jongman 319","fractie":"Restafval","from":45,"to":66}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"186","adres":"Grift  186","fractie":"Restafval","from":51,"to":54}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"185","adres":"Gouwe  185","fractie":"Restafval","from":34,"to":42}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"289","adres":"Schoolstraat  289","fractie":"Restafval","from":37,"to":62}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"104","adres":"Schepelgoorn 104","fractie":"Restafval","from":65,"to":70}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"107","adres":"Scharmbarg  107","fractie":"Restafval","from":3,"to":18}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"263","adres":"Rolderstraat  263","fractie":"Restafval","from":49,"to":77}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"126","adres":"Sleutelbloemstraat  126","fractie":"Restafval","from":5,"to":7}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"170","adres":"Schultestraat  170","fractie":"Restafval","from":32,"to":49}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"171","adres":"Schultestraat   171","fractie":"Restafval","from":21,"to":29}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"293","adres":"Schoolstraat  293","fractie":"Restafval","from":35,"to":58}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"270","adres":"Huygenstraat  270","fractie":"Restafval","from":29,"to":35}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"269","adres":"Huygenstraat  269","fractie":"Restafval","from":23,"to":33}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"325","adres":"Hoekbree 325","fractie":"Restafval","from":48,"to":62}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"111","adres":"Het Sticht  111","fractie":"Restafval","from":38,"to":42}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"306","adres":"Jan Fabriciusstraat  306","fractie":"Restafval","from":43,"to":49}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"227","adres":"Jan Fabriciusstraat  227","fractie":"Restafval","from":26,"to":41}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"226","adres":"Jan Fabriciusstraat  226","fractie":"Restafval","from":55,"to":60}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"156","adres":"J.H.A. Schaperstraat  156","fractie":"Restafval","from":65,"to":97}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"138","adres":"Buizerdstraat  138","fractie":"Restafval","from":15,"to":20}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"214","adres":"Burg. Agterstraat  214","fractie":"Restafval","from":60,"to":67}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"713PMD","adres":"Speenkruidstraat 46,  Assen","fractie":"PMD","from":1,"to":3}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"236","adres":"Brink  236","fractie":"Restafval","from":2,"to":24}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"333","adres":"Brunelstraat","fractie":"Restafval","from":65,"to":3}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"712PMD","adres":"Speenkruidstraat 161, 9404HG Assen","fractie":"PMD","from":1,"to":8}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"119","adres":"Bremstraat  119","fractie":"Restafval","from":54,"to":58}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"299","adres":"Bremstraat  299","fractie":"Restafval","from":38,"to":40}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"750PMD","adres":"Prins Hendrikstraat","fractie":"PMD","from":0,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"322","adres":"Beuzeveen 322","fractie":"Restafval","from":20,"to":39}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"288","adres":"Bosroos  288","fractie":"Restafval","from":50,"to":52}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"120","adres":"Dotterbloemstraat 120","fractie":"Restafval","from":44,"to":47}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"121","adres":"Dotterbloemstraat 121","fractie":"Restafval","from":22,"to":27}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"256","adres":"Doevekamp (gemeentehuis) 256","fractie":"Restafval","from":18,"to":30}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"231","adres":"Doevenkamp  231","fractie":"Restafval","from":45,"to":63}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"777PMD","adres":"Stadhouderslaan  177","fractie":"PMD","from":18,"to":19}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"225","adres":"Cereshof  225","fractie":"Restafval","from":24,"to":41}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"242L","adres":"Ceresplein \"Triade\"242","fractie":"Restafval","from":55,"to":70}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"729PMD","adres":"Sperwerstraat 329","fractie":"PMD","from":1,"to":5}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"217","adres":"Burg. de Dreuplein  217","fractie":"Restafval","from":57,"to":65}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"151","adres":"C van der Lindenstr  151 ","fractie":"Restafval","from":2,"to":13}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"714PMD","adres":"Speenkruidstraat 353, 9404HP Assen","fractie":"PMD","from":1,"to":4}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"130","adres":"Anemoonstraat  130","fractie":"Restafval","from":1,"to":6}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"732PMD","adres":"Vredeveldseweg","fractie":"PMD","from":0,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"278","adres":"Anne de Vriesstraat  278","fractie":"Restafval","from":43,"to":47}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"768PMD","adres":"Vondellaan  268","fractie":"PMD","from":1,"to":3}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"129","adres":"Anemoonstraat  129","fractie":"Restafval","from":39,"to":48}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"310","adres":"Amstelstraat  310","fractie":"Restafval","from":3,"to":14}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"767PMD","adres":"Vondellaan  267","fractie":"PMD","from":2,"to":6}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"109L","adres":"Amstelstraat 109, 9406TC Assen","fractie":"Restafval","from":25,"to":45}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"766PMD","adres":"Vondellaan  266","fractie":"PMD","from":16,"to":17}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"209","adres":"Alteveerstraat 209","fractie":"Restafval","from":42,"to":48}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"334","adres":"Bernardstraat","fractie":"Restafval","from":45,"to":50}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"102","adres":"Beunheugte 62, 9403HW Assen","fractie":"Restafval","from":40,"to":49}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"723PMD","adres":"Slingeborgh 323","fractie":"PMD","from":0,"to":2}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"208","adres":"Bellevue  208","fractie":"Restafval","from":70,"to":1}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"127","adres":"Berkenstraat  127","fractie":"Restafval","from":60,"to":62}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"741PMD","adres":"Beek","fractie":"PMD","from":52,"to":0}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"152","adres":"Beilerstraat  152","fractie":"Restafval","from":12,"to":43}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"203","adres":"Beilerstraat  203","fractie":"Restafval","from":4,"to":7}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"338","adres":"Beilerstraat","fractie":"Restafval","from":48,"to":49}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"792PMD","adres":"Obrechtlaan  292","fractie":"PMD","from":19,"to":20}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"198","adres":"Einsteinlaan  198","fractie":"Restafval","from":70,"to":6}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"188","adres":"Ellen  188","fractie":"Restafval","from":16,"to":21}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"194","adres":"Einsteinlaan  194","fractie":"Restafval","from":3,"to":11}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"195","adres":"Einsteinlaan  195","fractie":"Restafval","from":13,"to":19}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"150","adres":"Echtenstraat  150","fractie":"Restafval","from":12,"to":18}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"187","adres":"Eem  187","fractie":"Restafval","from":49,"to":60}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"161","adres":"DR A Kuyperstraat  161","fractie":"Restafval","from":37,"to":51}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"165","adres":"DR Schaepmanstraat  165","fractie":"Restafval","from":2,"to":16}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"133","adres":"Gerard Doustraat  133","fractie":"Restafval","from":17,"to":31}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"240","adres":"Gedempte Singel \"Iwema\" 240","fractie":"Restafval","from":1,"to":8}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"241","adres":"Gedempte Singel \"Fluitketel\" 241","fractie":"Restafval","from":33,"to":64}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"189","adres":"Epe  189","fractie":"Restafval","from":21,"to":28}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"246","adres":"Frambozenhof 246","fractie":"Restafval","from":50,"to":51}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"145","adres":"Oldengaardestraat  145","fractie":"Restafval","from":72,"to":6}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"146","adres":"Oldengaardestraat 146","fractie":"Restafval","from":54,"to":4}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"197","adres":"Nobellaan  197","fractie":"Restafval","from":50,"to":55}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"292","adres":"Obrechtlaan  292","fractie":"Restafval","from":35,"to":41}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"305","adres":"Nijlandstraat 305","fractie":"Restafval","from":35,"to":48}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"122","adres":"Dotterbloemstraat 122","fractie":"Restafval","from":68,"to":76}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"312","adres":"Nijlandstraat (Brandweer) 312","fractie":"Restafval","from":32,"to":46}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"159","adres":"DR A Kuyperstraat  159","fractie":"Restafval","from":6,"to":8}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"160","adres":"DR A Kuyperstraat  160","fractie":"Restafval","from":49,"to":56}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"123","adres":"Dotterbloemstraat 123","fractie":"Restafval","from":57,"to":63}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"158","adres":"DR A Kuyperstraat  158","fractie":"Restafval","from":51,"to":53}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"147","adres":"Oosterbroekstraat  147","fractie":"Restafval","from":1,"to":19}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"205","adres":"Oosterhoutstraat  205","fractie":"Restafval","from":55,"to":60}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"223","adres":"Omloop  223","fractie":"Restafval","from":28,"to":37}
+{"ts":"2026-06-19T06:32:46.100355+02:00","nr":"224","adres":"Omloop  224","fractie":"Restafval","from":34,"to":44}
