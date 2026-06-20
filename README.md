@@ -7,7 +7,7 @@ Live underground container fill rate monitoring dashboard for Gemeente Assen, bu
 ## What it does
 
 - Monitors **606 underground waste containers** across Assen
-- Shows **live fill rates** (vulgraad %) updated every 4 hours
+- Shows **live fill rates** (vulgraad %) updated daily
 - Interactive map with clustering, filtering by fractie/sensor/fill level
 - Dark/light mode auto-detection
 - Change log with emptied-container detection
@@ -67,13 +67,14 @@ python scripts/fetch_fillrates.py
 python scripts/collect_timeseries.py --interval 60 --duration 3600
 ```
 
-## API Documentation
+## Documentation
 
-See [docs/api.md](docs/api.md) for full endpoint and protocol documentation.
+- [API Documentation](docs/api.md) - Full endpoint and protocol documentation
+- [Home Assistant Integration](docs/homeassistant.md) - Monitor container fill levels in HA
 
 ## GitHub Actions
 
-The workflow runs every 4 hours (`0 */4 * * *`), fetches fresh data, commits to `main`, and deploys to GitHub Pages. All timestamps use `Europe/Amsterdam` timezone.
+The workflow runs daily at 05:00 Amsterdam time (`0 3 * * *` UTC), fetches fresh data, commits to `main`, and deploys to GitHub Pages. All timestamps use `Europe/Amsterdam` timezone.
 
 ## Related Projects
 
