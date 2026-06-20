@@ -103,7 +103,7 @@ cards:
 
 ## Notes
 
-- Data updates every 4 hours via GitHub Actions
-- `scan_interval: 3600` (1 hour) is a good balance — no point polling faster than the source updates
+- Data updates once daily at 05:00 via GitHub Actions
+- `scan_interval: 3600` (1 hour) ensures HA picks up new data promptly and retries on transient errors
 - BIO containers typically show 0% because their sensors are inactive
 - The history graph works best after a few days of data collection
