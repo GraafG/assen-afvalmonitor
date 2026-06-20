@@ -67,9 +67,10 @@ python scripts/fetch_fillrates.py
 python scripts/collect_timeseries.py --interval 60 --duration 3600
 ```
 
-## API Documentation
+## Documentation
 
-See [docs/api.md](docs/api.md) for full endpoint and protocol documentation.
+- [API Documentation](docs/api.md) - Full endpoint and protocol documentation
+- [Home Assistant Integration](docs/homeassistant.md) - Monitor container fill levels in HA
 
 ## GitHub Actions
 
