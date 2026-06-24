@@ -206,6 +206,20 @@
             'Onbekend': '#666',
         };
 
+        // GFT/organic ("BIO") containers don't have a working fill sensor (the
+        // source always reports 0%). Treat them as "no data" instead of 0% so
+        // they don't skew averages and statistics. Detection is by fractie, so
+        // newly added organic containers are handled automatically.
+        const ORGANIC_FRACTIES = new Set(['GFT', 'Groente, Fruit en Tuinafval']);
+        const isOrganicFractie = f => ORGANIC_FRACTIES.has(f);
+        const isOrganic = c => isOrganicFractie(c.type) || c.fractieKleur === 'GREEN';
+        // Set of container numbers that are organic, derived from history metadata.
+        const organicNrSet = histData => new Set(
+            Object.entries(histData.fractie_map || {})
+                .filter(([, f]) => isOrganicFractie(f))
+                .map(([nr]) => nr)
+        );
+
         function createGaugeSVG(pct, color) {
             const angle = (pct / 100) * 180;
             const rad = (Math.PI / 180);
@@ -240,9 +254,20 @@
                 type: c.fractie,
                 fillLevel: c.vulgraad,
                 heeftSensor: c.heeftSensor,
+                fractieKleur: c.fractieKleur,
                 lat: parseFloat(c.lat),
                 lng: parseFloat(c.lng),
             }));
+
+            // Organic (GFT/BIO) containers have no working sensor: drop their
+            // fill value so they count as "no data" rather than 0%.
+            containers.forEach(c => {
+                if (isOrganic(c)) {
+                    c.fillLevel = null;
+                    c.heeftSensor = false;
+                    c.noFillData = true;
+                }
+            });
 
             renderGauges(containers);
             renderFacts(containers);
@@ -338,9 +363,12 @@
             // If samples not available, load from current data
             const datasets = [];
 
-            // Overall average
+            // Overall average (excluding organic containers with no sensor data)
+            const organicNrs = organicNrSet(histData);
             const overallAvg = history.map(h => {
-                const vals = Object.values(h.containers);
+                const vals = Object.entries(h.containers)
+                    .filter(([nr]) => !organicNrs.has(nr))
+                    .map(([, v]) => v);
                 return vals.length ? Math.round(vals.reduce((a,b) => a+b, 0) / vals.length) : null;
             });
             datasets.push({
@@ -371,6 +399,7 @@
             }
 
             fracties.forEach(fractie => {
+                if (isOrganicFractie(fractie)) return; // no sensor data
                 const nrs = nrsByFractie[fractie];
                 if (!nrs || nrs.length < 5) return;
                 const avg = history.map(h => {
@@ -428,6 +457,7 @@
             const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
 
             const history = histData.history;
+            const organicNrs = organicNrSet(histData);
             const dayLabels = ['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'];
             const counts = new Array(7).fill(0);
             const daysSeen = Array.from({ length: 7 }, () => new Set());
@@ -449,6 +479,7 @@
                 const idx = toIdx(d);
                 daysSeen[idx].add(dayKey(d));
                 for (const nr of Object.keys(curr)) {
+                    if (organicNrs.has(nr)) continue; // no sensor data
                     const p = prev[nr];
                     if (p === undefined) continue;
                     const after = curr[nr];
@@ -513,6 +544,7 @@
             </div>`;
 
             Object.entries(groups)
+                .filter(([, fills]) => fills.length > 0)
                 .sort((a,b) => b[1].length - a[1].length)
                 .forEach(([type, fills]) => {
                     const avg = Math.round(fills.reduce((a,b) => a+b, 0) / fills.length);
