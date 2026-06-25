@@ -341,6 +341,15 @@
             'PMD': '#ff9800',
             'Onbekend': '#666',
         };
+
+        // GFT/organic ("BIO") containers don't have a working fill sensor: the
+        // source always reports 0%. Treat them as "no data" rather than 0% so
+        // they don't pollute fill rates and statistics. Detection is by fractie,
+        // so newly added organic containers are handled automatically.
+        const ORGANIC_FRACTIES = new Set(['GFT', 'Groente, Fruit en Tuinafval']);
+        function isOrganic(c) {
+            return ORGANIC_FRACTIES.has(c.type) || c.fractieKleur === 'GREEN';
+        }
         
         let containers = [];
         let markers = [];
@@ -427,6 +436,10 @@
                 html += `
                     <div class="info-row"><span class="label">Vulgraad</span><span><strong>${level}%</strong></span></div>
                     <div class="fill-indicator"><div class="bar" style="width:${level}%;background:${barColor}"></div></div>
+                `;
+            } else {
+                html += `
+                    <div class="info-row"><span class="label">Vulgraad</span><span>Geen sensordata</span></div>
                 `;
             }
             
@@ -543,6 +556,16 @@
                 }
             }
             
+            // Organic (GFT/BIO) containers have no working sensor: drop their
+            // fill value so they're shown/counted as "no data" instead of 0%.
+            containers.forEach(c => {
+                if (isOrganic(c)) {
+                    c.fillLevel = null;
+                    c.heeftSensor = false;
+                    c.noFillData = true;
+                }
+            });
+
             updateStats();
             buildLegend();
             updateMarkers();
@@ -670,6 +693,17 @@
             const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
             const textColor = isDark ? '#71767b' : '#5b6570';
+
+            // Organic containers report 0% constantly (no working sensor) - don't
+            // render a misleading flat line, show a "no data" message instead.
+            const cont = containers.find(c => c.number === nr);
+            if (cont && cont.noFillData) {
+                if (historyChart) historyChart.destroy();
+                historyChart = null;
+                document.getElementById('history-chart').parentElement.querySelector('h3').textContent =
+                    'Vulgraad historie — #' + nr + ' (geen sensor)';
+                return;
+            }
             
             // Get history for this specific container
             const points = historyData.history

@@ -46,6 +46,8 @@ Each container provides: `ContainerNummer`, `Latitude`, `Longitude`, `Vulgraad` 
 
 **Fracties:** Restafval (grey), GFT (green), Papier (blue), PMD (orange), Glas (skyblue)
 
+> **Note on GFT/organic containers:** The source marks `HeeftSensor: true` for all GFT ("BIO") containers, but in practice they have no working fill sensor and always report `0%`. The dashboard treats organic containers (fractie `GFT` / `Groente, Fruit en Tuinafval`) as **"no fill data"** rather than 0% — they're hidden from fill rates, averages and statistics. This is detected by fractie, so newly added organic containers are handled automatically.
+
 ## Scripts
 
 | Script | Purpose |
