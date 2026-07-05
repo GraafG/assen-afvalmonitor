@@ -12,6 +12,13 @@ permissions:
   pages: write
   id-token: write
 
+# Serialize Pages deployments. Overlapping deployments to the github-pages
+# environment are the most common cause of "Deployment failed, try again later".
+# Do not cancel in-progress runs so the data commit + deploy always finish.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -48,6 +55,16 @@ jobs:
         uses: actions/upload-pages-artifact@v5
         with:
           path: '.'
-      
+
+  # Deploy runs as its own job bound to the github-pages environment, matching
+  # GitHub's recommended Pages pattern for reliable deployments.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v5
