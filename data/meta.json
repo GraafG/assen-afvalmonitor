@@ -1,9 +1,9 @@
 {
   "source": "burgerportaal-mendix",
   "url": "https://21burgerportaal.mendixcloud.com",
-  "updated": "2026-09-27T10:51:08.598482+02:00",
+  "updated": "2026-09-28T11:15:17.873805+02:00",
   "timezone": "Europe/Amsterdam",
   "containers": 609,
   "with_sensor": 600,
-  "avg_vulgraad": 21.0
+  "avg_vulgraad": 24.7
 }
