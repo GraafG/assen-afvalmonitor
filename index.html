@@ -120,6 +120,11 @@
         }
         
         #map { flex: 1; }
+        @media (prefers-color-scheme: dark) {
+            .map-tiles { filter: invert(100%) hue-rotate(180deg) brightness(0.9) contrast(0.9); }
+        }
+        .data-status { color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 1rem; }
+        .data-status[data-state="stale"], .data-status[data-state="error"] { color: #f44336; }
         
         .refresh-btn {
             position: fixed; bottom: 1.5rem; right: 1.5rem;
@@ -136,9 +141,8 @@
             display: inline-block; padding: 0.2rem 0.5rem;
             border-radius: 4px; font-size: 0.7rem;
             font-weight: 600; text-transform: uppercase;
+            background: var(--bg-card); color: var(--text-secondary);
         }
-        .status-badge.live { background: #00ba7c33; color: #00ba7c; }
-        .status-badge.static { background: #f9197f33; color: #f9197f; }
         
         @media (max-width: 768px) {
             .layout { flex-direction: column-reverse; }
@@ -241,12 +245,13 @@
     <div class="header">
         <h1>🗑️ Assen Afvalmonitor</h1>
         <span class="subtitle">Ondergrondse containers</span>
-        <span class="status-badge static">Static Data</span>
+        <span class="status-badge">Dagelijkse metingen</span>
         <a href="stats.html" style="margin-left:auto; color:var(--accent); text-decoration:none; font-size:0.85rem; font-weight:600;">📊 Statistieken</a>
     </div>
     
     <div class="layout">
         <div class="sidebar">
+            <p class="data-status" id="data-status" role="status">Data laden...</p>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="value" id="total-count">-</div>
@@ -332,6 +337,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script src="scripts/dashboard-data.js"></script>
     <script>
         const TYPE_COLORS = {
             'Restafval': '#ff6b35',
@@ -358,25 +364,15 @@
         let map;
         let markerGroup;
         
-        // Detect color scheme preference
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const tileUrl = isDark
-            ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-        
         // Initialize map centered on Assen
         map = L.map('map', { zoomControl: true }).setView([52.9925, 6.5625], 14);
-        const tileLayer = L.tileLayer(tileUrl, {
-            attribution: '© OpenStreetMap contributors © CARTO',
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            className: 'map-tiles',
             maxZoom: 19
         }).addTo(map);
         
-        // Switch tiles when system theme changes
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-            const newUrl = e.matches
-                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-            tileLayer.setUrl(newUrl);
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             updateMarkers(); // refresh marker stroke colors
         });
         
@@ -521,9 +517,10 @@
         
         // Load container data
         async function init() {
+            let hasFillRates = true;
             try {
                 // Load live fill rate data
-                const resp = await fetch('data/containers_fillrates.json');
+                const resp = await fetchData('data/containers_fillrates.json');
                 const raw = await resp.json();
                 containers = raw.map(c => ({
                     number: c.nr,
@@ -536,14 +533,17 @@
                     heeftSensor: c.heeftSensor,
                     fractieKleur: c.fractieKleur,
                 }));
-            } catch {
+            } catch (error) {
+                console.warn('Vulgraaddata kon niet geladen worden; locaties worden gebruikt:', error);
+                hasFillRates = false;
                 // Fallback: static ArcGIS data
                 try {
-                    const resp = await fetch('data/containers.json');
+                    const resp = await fetchData('data/containers.json');
                     containers = await resp.json();
-                } catch {
+                } catch (error) {
+                    console.warn('Lokale containerlocaties konden niet geladen worden:', error);
                     const url = 'https://services1.arcgis.com/p5QhXC0i0sZjprM1/arcgis/rest/services/kaart_Ondergrondse_containers_Assen_weergave_NV/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&returnGeometry=true&resultRecordCount=1000&f=json';
-                    const resp = await fetch(url);
+                    const resp = await fetchData(url);
                     const data = await resp.json();
                     containers = data.features.map(f => ({
                         id: f.attributes.OBJECTID,
@@ -569,21 +569,25 @@
             updateStats();
             buildLegend();
             updateMarkers();
+            await loadDataStatus(hasFillRates);
             
             // Load history: real data only
             try {
-                const realResp = await fetch('data/history.json');
+                const realResp = await fetchData('data/history.json');
                 if (realResp.ok) {
                     const histData = await realResp.json();
                     if (histData.history && histData.history.length > 0) {
                         renderHistoryChart(histData);
                     }
                 }
-            } catch {}
+            } catch (error) {
+                console.warn('Historische data kon niet geladen worden:', error);
+                document.querySelector('#history-panel h3').textContent = 'Historische data kon niet geladen worden.';
+            }
             
             // Load real events (from CI), fall back to deriving from history
             try {
-                const evResp = await fetch('data/events.ndjson');
+                const evResp = await fetchData('data/events.ndjson');
                 const evText = await evResp.text();
                 if (evText.trim()) {
                     const events = evText.trim().split('\n').map(l => JSON.parse(l));
@@ -592,7 +596,8 @@
                 } else {
                     renderChangelogFromHistory();
                 }
-            } catch {
+            } catch (error) {
+                console.warn('Wijzigingenlog kon niet geladen worden; historie wordt gebruikt:', error);
                 renderChangelogFromHistory();
             }
         }
@@ -888,7 +893,10 @@
             });
         });
 
-        init();
+        init().catch(error => {
+            console.error('Containerdata kon niet geladen worden:', error);
+            setDataStatus('Containerdata kon niet geladen worden. Probeer de pagina opnieuw te laden.');
+        });
     </script>
 </body>
 </html>
