@@ -18,13 +18,25 @@ Live underground container fill rate monitoring dashboard for Gemeente Assen, bu
 Burgerportaal Mendix Web App (21burgerportaal.mendixcloud.com)
         │
         ▼  Playwright browser automation
-GitHub Actions (every 4 hours)
+GitHub Actions (daily)
         │
         ▼  Commits data/containers_fillrates.json
 GitHub Pages (static dashboard)
 ```
 
 The Mendix XAS protocol requires client-side hash computation, so direct API calls don't work. Instead, we use **Playwright** to automate the web portal and intercept the XAS response containing all container data.
+
+### Map tiles
+
+The map uses key-free [OpenStreetMap raster tiles](https://operations.osmfoundation.org/policies/tiles/) with Leaflet. CARTO started displaying an API-key-required watermark; [Home Assistant solved the same issue by switching to OpenStreetMap vector tiles](https://github.com/home-assistant/frontend/pull/53816). This dashboard uses OSM's raster endpoint to keep its existing Leaflet setup without adding MapLibre, WebGL requirements, or bundled vector styles/fonts. Dark mode applies a filter only to the base tiles, leaving container colours unchanged.
+
+OSM attribution stays visible, and the browser sends its normal referrer and honours tile caching headers. There is no tile prefetching or offline download.
+
+### Data freshness
+
+Both pages display the actual collection timestamp from `data/meta.json` in Amsterdam time, with a warning when it is at least 48 hours old. This is the collector's timestamp, not the time the page was opened or the sensor's own measurement time. Missing metadata and location-only fallback data are explicitly labelled instead of being presented as current fill readings.
+
+Dashboard data requests revalidate the HTTP cache on page load; map tiles retain normal caching. Reload an already-open page to retrieve the latest daily snapshot. The statistics timeline also names its latest snapshot, since chart axes may skip date labels.
 
 ## Available Data
 
@@ -76,7 +88,9 @@ python scripts/collect_timeseries.py --interval 60 --duration 3600
 
 ## GitHub Actions
 
-The workflow runs daily at 05:00 Amsterdam time (`0 3 * * *` UTC), fetches fresh data, commits to `main`, and deploys to GitHub Pages. All timestamps use `Europe/Amsterdam` timezone.
+The workflow is scheduled daily at 03:00 UTC (`0 3 * * *`), which is 05:00 Amsterdam time in summer and 04:00 in winter. GitHub Actions may start scheduled runs later. It fetches fresh data, commits to `main`, and deploys to GitHub Pages. All collection timestamps use the `Europe/Amsterdam` timezone.
+
+The dashboard data-loading and freshness regression tests use Node's built-in test runner: `node --test`.
 
 ## Related Projects
 
