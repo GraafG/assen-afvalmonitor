@@ -1,0 +1,52 @@
+name: Validate Python setup
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Match deploy.yml: Python 3.11, with no dependency cache configured.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install playwright
+          python -m pip check
+
+      # Compile only: importing the scripts could fetch or change live data.
+      - name: Check Python runtime and script syntax
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+
+          from playwright.sync_api import sync_playwright
+
+          assert sys.version_info[:2] == (3, 11), sys.version
+          scripts = sorted(Path("scripts").rglob("*.py"))
+          assert scripts, "No Python scripts found"
+          for script in scripts:
+              try:
+                  compile(script.read_bytes(), str(script), "exec")
+              except SyntaxError as error:
+                  # Do not log source lines, which may contain sensitive values.
+                  raise SystemExit(
+                      f"Syntax error in {script} at line {error.lineno}"
+                  ) from None
+          with sync_playwright() as playwright:
+              assert playwright.chromium.name == "chromium"
+          print(f"Python 3.11 and Playwright ready; compiled {len(scripts)} scripts")
+          PY
