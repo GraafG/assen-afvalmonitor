@@ -1,88 +1,63 @@
-name: Update Data & Deploy
+name: Deploy dashboard
 
 on:
-  schedule:
-    - cron: '0 3 * * *'  # Daily at 05:00 Amsterdam (03:00 UTC)
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - index.html
+      - stats.html
+      - scripts/dashboard-data.js
+      - data/**
+      - .github/workflows/deploy.yml
+  workflow_run:
+    workflows: ["Capture data"]
+    types: [completed]
+    branches: [main]
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
-# Serialize Pages deployments. Overlapping deployments to the github-pages
-# environment are the most common cause of "Deployment failed, try again later".
-# Do not cancel in-progress runs so the data commit + deploy always finish.
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: false
 
 jobs:
   build:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      
-      - uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
-      
-      - name: Install dependencies
-        run: |
-          pip install playwright
-          playwright install chromium --with-deps
-      
-      - name: Test portal navigation
-        run: python -m unittest discover -s tests -p "test_*.py"
+          ref: main
+          persist-credentials: false
 
-      - name: Fetch fill rate data
-        env:
-          TZ: Europe/Amsterdam
-        run: python scripts/fetch_fillrates.py
-      
-      - name: Commit updated data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/
-          if git diff --staged --quiet; then
-            echo "No data changes to commit."
-            exit 0
-          fi
-          git commit -m "Update container data [skip ci]"
-          # origin can advance between checkout and push (e.g. re-running an
-          # older run or overlapping runs). The freshly scraped data is
-          # authoritative, so on divergence rebase preferring our version of the
-          # data files, then retry the push. This avoids the detached-HEAD state
-          # a failed "git pull --rebase" used to leave behind.
-          branch="${GITHUB_REF_NAME}"
-          for attempt in 1 2 3 4 5; do
-            if git push origin "HEAD:${branch}"; then
-              echo "Pushed data update to ${branch} (attempt $attempt)."
-              exit 0
-            fi
-            echo "Push rejected; rebasing onto latest origin/${branch} (attempt $attempt)."
-            git fetch origin "${branch}"
-            git rebase -X theirs "origin/${branch}" || git rebase --abort
-          done
-          echo "::error::Failed to push updated data after 5 attempts."
-          exit 1
-      
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Test dashboard
+        run: node --test
+
       - name: Setup Pages
         uses: actions/configure-pages@v6
-      
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
           path: '.'
 
-  # Deploy runs as its own job bound to the github-pages environment, matching
-  # GitHub's recommended Pages pattern for reliable deployments.
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

@@ -1,0 +1,94 @@
+name: Capture data
+
+on:
+  schedule:
+    - cron: '0 3,6,9 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Capture again even if today's valid snapshot already exists
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: capture-data
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Check today's snapshot
+        id: freshness
+        env:
+          FORCE_CAPTURE: ${{ inputs.force || false }}
+        run: |
+          args=()
+          if [[ "$FORCE_CAPTURE" == "true" ]]; then args+=(--force); fi
+          python scripts/daily_capture.py status "${args[@]}" >> "$GITHUB_OUTPUT"
+
+      - name: Install capture dependencies
+        if: steps.freshness.outputs.needed == 'true'
+        run: |
+          pip install playwright
+          playwright install chromium --with-deps
+
+      - name: Test capture
+        if: steps.freshness.outputs.needed == 'true'
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Capture and validate snapshot
+        if: steps.freshness.outputs.needed == 'true'
+        run: python -u scripts/daily_capture.py capture --output-dir "$RUNNER_TEMP/captured-data"
+
+      - name: Back up validated snapshot
+        if: steps.freshness.outputs.needed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: container-snapshot-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/captured-data/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit validated data
+        if: steps.freshness.outputs.needed == 'true'
+        run: |
+          cp "$RUNNER_TEMP/captured-data/"* data/
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/containers_fillrates.json data/state.json data/events.ndjson data/history.json data/meta.json
+          git commit -m "Update container data [skip ci]"
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then exit 0; fi
+            if ! git pull --rebase origin main; then
+              git rebase --abort
+              echo "::error::Data conflict. Recover the validated snapshot from this run's artifact."
+              exit 1
+            fi
+          done
+          echo "::error::Push failed. Recover the validated snapshot from this run's artifact."
+          exit 1
+
+      - name: Summarize capture
+        if: success()
+        env:
+          NEEDED: ${{ steps.freshness.outputs.needed }}
+        run: |
+          if [[ "$NEEDED" == "true" ]]; then
+            echo "Validated snapshot committed. Artifact backup retained for 30 days." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Today's valid Amsterdam snapshot already exists. No browser launched and no data changed." >> "$GITHUB_STEP_SUMMARY"
+          fi

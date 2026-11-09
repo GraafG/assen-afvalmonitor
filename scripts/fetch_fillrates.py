@@ -10,6 +10,7 @@ Requirements:
     playwright install chromium
 """
 
+import argparse
 import json
 import re
 import sys
@@ -17,6 +18,8 @@ import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
+
+from daily_capture import validate_containers
 
 try:
     from playwright.sync_api import sync_playwright
@@ -114,9 +117,12 @@ def parse_containers(data):
             fracties[obj["guid"]] = attrs.get("Naam", {}).get("value", "")
 
         elif ot == "Burger_Applicatie.Locatie":
-            vulgraad = attrs.get("Vulgraad", {}).get("value", 0)
+            fill_attribute = attrs.get("Vulgraad")
+            if not isinstance(fill_attribute, dict) or "value" not in fill_attribute:
+                raise ValueError("Container response is missing Vulgraad")
+            vulgraad = fill_attribute["value"]
             if isinstance(vulgraad, str):
-                vulgraad = int(vulgraad) if vulgraad.isdigit() else 0
+                vulgraad = int(vulgraad)
             elif vulgraad is None:
                 vulgraad = 0
 
@@ -149,8 +155,8 @@ def parse_containers(data):
     return locaties
 
 
-def main():
-    output_dir = Path(__file__).parent.parent / "data"
+def main(output_dir=None):
+    output_dir = output_dir or Path(__file__).parent.parent / "data"
     output_dir.mkdir(exist_ok=True)
     output_file = output_dir / "containers_fillrates.json"
     state_file = output_dir / "state.json"
@@ -158,7 +164,6 @@ def main():
     history_file = output_dir / "history.json"
 
     ams_tz = ZoneInfo("Europe/Amsterdam")
-    now_ams = datetime.now(ams_tz)
 
     print("Fetching container fill rates from Burgerportaal...\n")
 
@@ -175,6 +180,13 @@ def main():
             print("\n!! Response received but no containers parsed!")
             sys.exit(1)
 
+        previous_count = 0
+        if output_file.exists():
+            with open(output_file, encoding="utf-8") as f:
+                previous_count = len(json.load(f))
+        validate_containers(locaties, previous_count)
+        now_ams = datetime.now(ams_tz)
+
         # Save full data
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(locaties, f, indent=2, ensure_ascii=False)
@@ -185,7 +197,7 @@ def main():
         # Load previous state and diff
         prev_state = {}
         if state_file.exists():
-            with open(state_file) as f:
+            with open(state_file, encoding="utf-8") as f:
                 prev_state = json.load(f)
 
         # Detect changes
@@ -211,14 +223,14 @@ def main():
             print(f"   Changes detected: {len(changes)} containers changed")
 
         # Save current state
-        with open(state_file, "w") as f:
+        with open(state_file, "w", encoding="utf-8") as f:
             json.dump(current_state, f, separators=(",", ":"))
 
         # Update rolling history (append snapshot, keep last 30 days = 1 per day)
         snapshot = {"ts": now_ams.isoformat(), "containers": current_state}
         hist = {"samples": [], "history": []}
         if history_file.exists():
-            with open(history_file) as f:
+            with open(history_file, encoding="utf-8") as f:
                 hist = json.load(f)
         # Replace today's entry if it already exists, otherwise append
         today = now_ams.strftime("%Y-%m-%d")
@@ -232,7 +244,7 @@ def main():
             hist["samples"] = [{"nr": s["nr"], "adres": s["adres"], "fractie": s["fractie"]} for s in samples]
         # Store fractie map for all containers (enables per-fractie timeline)
         hist["fractie_map"] = {l["nr"]: l["fractie"] for l in locaties if l["nr"] and l["fractie"]}
-        with open(history_file, "w") as f:
+        with open(history_file, "w", encoding="utf-8") as f:
             json.dump(hist, f, separators=(",", ":"), ensure_ascii=False)
 
         # Stats
@@ -254,7 +266,7 @@ def main():
             "with_sensor": with_sensor,
             "avg_vulgraad": round(avg_fill, 1),
         }
-        with open(meta_file, "w") as f:
+        with open(meta_file, "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=2)
 
     except TimeoutError as e:
@@ -268,4 +280,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", type=Path)
+    main(parser.parse_args().output_dir)

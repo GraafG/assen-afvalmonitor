@@ -1,0 +1,33 @@
+name: Check daily data freshness
+
+on:
+  schedule:
+    - cron: '17 12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  freshness:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Require today's committed and deployed snapshot
+        run: python scripts/daily_capture.py check --deployed-url https://graafg.github.io/assen-afvalmonitor/
+
+      - name: Report missing daily data
+        if: failure()
+        run: |
+          echo "::error::Daily snapshot check failed. Inspect capture and deployment runs."
+          echo "Daily data is missing, invalid, or not fully deployed. Inspect Capture data and Deploy dashboard; see README recovery steps." >> "$GITHUB_STEP_SUMMARY"
