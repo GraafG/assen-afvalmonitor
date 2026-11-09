@@ -19,16 +19,13 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from fetch_fillrates import navigate_to_containers
+
 try:
     from playwright.sync_api import sync_playwright
 except ImportError:
     print("Error: playwright not installed. Run: pip install playwright && playwright install chromium")
     sys.exit(1)
-
-BASE_URL = "https://21burgerportaal.mendixcloud.com"
-ZIPCODE = "9402JK"
-HOUSENUMBER = "4"
-ADDRESS_MATCH = "4J"
 
 OUTPUT_FILE = Path(__file__).parent.parent / "data" / "timeseries.ndjson"
 
@@ -41,32 +38,7 @@ def setup_session():
     page = context.new_page()
 
     print("Setting up session - navigating to container map...")
-    page.goto(f"{BASE_URL}/p/assen/landing/", wait_until="networkidle")
-    page.wait_for_timeout(2000)
-
-    page.locator("input[placeholder='uw postcode']").first.fill(ZIPCODE)
-    page.locator("input[placeholder='uw huisnummer']").first.fill(HOUSENUMBER)
-    page.wait_for_timeout(500)
-
-    page.locator("button:has-text('Volgende')").first.click()
-    page.wait_for_timeout(6000)
-
-    for item in page.locator(".mx-templategrid-item, .mx-listview-item").all():
-        if ADDRESS_MATCH in item.inner_text():
-            item.click()
-            break
-    page.wait_for_timeout(5000)
-
-    for item in page.locator(".mx-templategrid-item, .mx-listview-item").all():
-        if "Informatie" in item.inner_text():
-            item.click()
-            break
-    page.wait_for_timeout(5000)
-
-    for item in page.locator(".mx-templategrid-item, .mx-listview-item").all():
-        if "Ondergrondse" in item.inner_text():
-            item.click()
-            break
+    navigate_to_containers(page)
     page.wait_for_timeout(10000)
 
     print("Session ready - on container map page.")
@@ -91,15 +63,8 @@ def capture_snapshot(page):
 
     page.on("response", on_response)
 
-    # Trigger a refresh by navigating back and forward to the container template
-    page.reload(wait_until="networkidle")
-    page.wait_for_timeout(3000)
-
-    # Re-navigate to underground containers
-    for item in page.locator(".mx-templategrid-item, .mx-listview-item").all():
-        if "Ondergrondse" in item.inner_text():
-            item.click()
-            break
+    # Re-enter the map so Mendix requests fresh data instead of restoring it.
+    navigate_to_containers(page)
 
     # Wait for data
     for _ in range(24):

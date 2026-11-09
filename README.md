@@ -92,6 +92,8 @@ The workflow is scheduled daily at 03:00 UTC (`0 3 * * *`), which is 05:00 Amste
 
 The dashboard data-loading and freshness regression tests use Node's built-in test runner: `node --test`.
 
+Run the portal navigation regression tests with `python -m unittest discover -s tests -p "test_*.py"` after installing Playwright and Chromium. CI runs these tests before collection. Both collectors select visible buttons by their accessible names. They do not click responsive grid wrappers, which can use `display: contents` and have no clickable box.
+
 ## Related Projects
 
 - [homeassistant-afvalwijzer](https://github.com/xirixiz/homeassistant-afvalwijzer) - HA integration for Burgerportaal calendar

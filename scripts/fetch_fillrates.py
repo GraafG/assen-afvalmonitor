@@ -11,6 +11,7 @@ Requirements:
 """
 
 import json
+import re
 import sys
 import time
 from datetime import datetime, timezone, timedelta
@@ -29,6 +30,32 @@ BASE_URL = "https://21burgerportaal.mendixcloud.com"
 ZIPCODE = "9402JK"
 HOUSENUMBER = "4"
 ADDRESS_MATCH = "4J"
+
+
+def navigate_to_containers(page):
+    """Select visible controls, not boxless responsive grid wrappers."""
+    print("  Loading page...")
+    page.goto(f"{BASE_URL}/p/assen/landing/", wait_until="domcontentloaded")
+
+    print("  Filling address...")
+    page.locator("input[placeholder='uw postcode']").first.fill(ZIPCODE)
+    page.locator("input[placeholder='uw huisnummer']").first.fill(HOUSENUMBER)
+
+    print("  Clicking Volgende...")
+    page.get_by_role("button", name="Volgende", exact=True).click()
+
+    print("  Selecting address...")
+    page.get_by_role(
+        "button", name=re.compile(rf"\b{re.escape(ADDRESS_MATCH)},")
+    ).click()
+
+    print("  Selecting Informatie...")
+    page.get_by_role("button", name=re.compile(r"^Informatie\b")).click()
+
+    print("  Selecting Ondergrondse containers...")
+    page.get_by_role(
+        "button", name=re.compile(r"^Ondergrondse containers\b")
+    ).click()
 
 
 def fetch_containers():
@@ -55,38 +82,7 @@ def fetch_containers():
     page.on("response", on_response)
 
     try:
-        print("  Loading page...")
-        page.goto(f"{BASE_URL}/p/assen/landing/", wait_until="networkidle")
-        page.wait_for_timeout(2000)
-
-        print("  Filling address...")
-        page.locator("input[placeholder='uw postcode']").first.fill(ZIPCODE)
-        page.locator("input[placeholder='uw huisnummer']").first.fill(HOUSENUMBER)
-        page.wait_for_timeout(500)
-
-        print("  Clicking Volgende...")
-        page.locator("button:has-text('Volgende')").first.click()
-        page.wait_for_timeout(6000)
-
-        print("  Selecting address...")
-        for item in page.locator(".mx-templategrid-item, .mx-listview-item").all():
-            if ADDRESS_MATCH in item.inner_text():
-                item.click()
-                break
-        page.wait_for_timeout(5000)
-
-        print("  Selecting Informatie...")
-        for item in page.locator(".mx-templategrid-item, .mx-listview-item").all():
-            if "Informatie" in item.inner_text():
-                item.click()
-                break
-        page.wait_for_timeout(5000)
-
-        print("  Selecting Ondergrondse containers...")
-        for item in page.locator(".mx-templategrid-item, .mx-listview-item").all():
-            if "Ondergrondse" in item.inner_text():
-                item.click()
-                break
+        navigate_to_containers(page)
 
         print("  Waiting for container data...")
         for i in range(24):  # Up to 2 minutes
