@@ -119,7 +119,7 @@ UTC times are one hour earlier than Amsterdam time in winter and two hours earli
 - Missing or malformed source fill fields fail collection. The source's explicit `null` fill value still means zero, as before. Collection timestamps record when data was received, not when the workflow started.
 - Only a complete, validated snapshot can reach the commit step. It contains `containers_fillrates.json`, `state.json`, `events.ndjson`, `history.json`, and `meta.json`. History keeps one snapshot per Amsterdam date, for up to 30 days.
 - Before committing, capture saves those five files in a `container-snapshot-<run-id>-<attempt>` artifact for 30 days. A failed Git push leaves that backup available. Push retries rebase without automatic conflict resolution; conflicts fail explicitly.
-- Capture runs are serialized and never canceled by a later capture. Deployment uses a separate concurrency group and permissions.
+- Capture runs are serialized. A later run does not cancel an active capture, but GitHub can replace a pending run. Deployment uses a separate concurrency group and permissions. A replacement deployment reads the latest `main`.
 
 The inventory threshold detects incomplete responses; it cannot prove the source is correct. If Assen legitimately removes more than 10% of its containers, verify the source and review the baseline before accepting the change.
 
